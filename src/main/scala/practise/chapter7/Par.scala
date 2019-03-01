@@ -3,6 +3,7 @@ package practise.chapter7
 import java.util.concurrent._
 
 // 构建出简单的可组合的核心数据类型和函数，才是重点
+//赋予api代数性质
 object Par {
   type Par[A] = ExecutorService => Future[A]
 
@@ -58,6 +59,20 @@ object Par {
       map2(sequenceBalanced(l), sequenceBalanced(r))(_ ++ _)
     }
   }
+
+  /** Implement map3, map4, and map5 in terms of map2 */
+  def map3[A, B, C, D](fa: Par[A], fb: Par[B], fc: Par[C])(f: (A, B, C) => D): Par[D] = {
+    map2(map2(fa, fb)((a, b) => (c: C) => f(a, b, c)), fc)(_(_))
+  }
+
+  def map4[A, B, C, D, E](fa: Par[A], fb: Par[B], fc: Par[C], fd: Par[D])(f: (A, B, C, D) => E): Par[E] = {
+    map2(map2(map2(fa, fb)((a, b) => (c: C) => (d: D) => f(a, b, c, d)), fc)(_(_)), fd)(_(_))
+  }
+
+  def map5[A, B, C, D, E, F](fa: Par[A], fb: Par[B], fc: Par[C], fd: Par[D], fe: Par[E])(f: (A, B, C, D, E) => F): Par[F] = {
+    map2(map2(map2(map2(fa, fb)((a, b) => (c: C) => (d: D) => (e: E) => f(a, b, c, d, e)), fc)(_(_)), fd)(_(_)), fe)(_(_))
+  }
+
 
   def sequence[A](as: List[Par[A]]): Par[List[A]] =
     map(sequenceBalanced(as.toIndexedSeq))(_.toList)
@@ -170,6 +185,29 @@ object Par {
     iter(as)
   }
 
+  /** Exercise 8
+    *
+    * Show why fork(x) == x does not hold for all ExecutorServices
+    *
+    * The implementation of fork queues the computation to be executed in the threadpool then blocks on that Future.
+    * This is a problem, however, as the singleThreadedExecutorPool only has one thread, so this will result in a
+    * non-terminating computation due to deadlock. (i.e., the single thread in the pool is blocked waiting for a
+    * Callable that will never be dequeued, due to the thread being blocked)
+    */
+
+  /** Exercise 9
+    *
+    * Can you show that any sized threadpool can be made to deadlock given this implementation of fork?
+    */
+  //要么修复，要么声明有效的前提条件
+  def deadlock[A](threadPoolSize: Int, a: A): Par[A] = {
+    if (threadPoolSize <= 1) {
+      async(a)
+    } else {
+      fork(deadlock(threadPoolSize - 1, a))
+    }
+  }
+  def async[A](a: => A): Par[A] = fork(unit(a))
 
   def main(args: Array[String]): Unit = {
     println(map(unit(1))(_ + 1) == unit(2))// some point they are equal
