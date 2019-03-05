@@ -62,15 +62,15 @@ object Par {
 
   /** Implement map3, map4, and map5 in terms of map2 */
   def map3[A, B, C, D](fa: Par[A], fb: Par[B], fc: Par[C])(f: (A, B, C) => D): Par[D] = {
-    map2(map2(fa, fb)((a, b) => (c: C) => f(a, b, c)), fc)(_(_))
+    map2(map2(fa, fb)((a, b) => (c: C) => f(a, b, c)), fc)(_ (_))
   }
 
   def map4[A, B, C, D, E](fa: Par[A], fb: Par[B], fc: Par[C], fd: Par[D])(f: (A, B, C, D) => E): Par[E] = {
-    map2(map2(map2(fa, fb)((a, b) => (c: C) => (d: D) => f(a, b, c, d)), fc)(_(_)), fd)(_(_))
+    map2(map2(map2(fa, fb)((a, b) => (c: C) => (d: D) => f(a, b, c, d)), fc)(_ (_)), fd)(_ (_))
   }
 
   def map5[A, B, C, D, E, F](fa: Par[A], fb: Par[B], fc: Par[C], fd: Par[D], fe: Par[E])(f: (A, B, C, D, E) => F): Par[F] = {
-    map2(map2(map2(map2(fa, fb)((a, b) => (c: C) => (d: D) => (e: E) => f(a, b, c, d, e)), fc)(_(_)), fd)(_(_)), fe)(_(_))
+    map2(map2(map2(map2(fa, fb)((a, b) => (c: C) => (d: D) => (e: E) => f(a, b, c, d, e)), fc)(_ (_)), fd)(_ (_)), fe)(_ (_))
   }
 
 
@@ -179,7 +179,7 @@ object Par {
       * map(map(y)(id))(f) == map(y)(f)             -- as map(y)(id) == y
       * map(map(y)(id))(f) == map(y)(f compose id)  -- as f compose id == f
       * map(map(y)(g))(f) == map(y)(f compose g)    -- as id can be swapped with an arbitrary g because of the free
-      *                                                theorem
+      * theorem
       */
 
     iter(as)
@@ -207,10 +207,65 @@ object Par {
       fork(deadlock(threadPoolSize - 1, a))
     }
   }
+
   def async[A](a: => A): Par[A] = fork(unit(a))
 
+  /** Exercise 10
+    *
+    * Our non-blocking representation does not currently handle errors at all. How can you change the representation
+    * to do so?
+    *
+    * See scala.concurrent.Future or scalaz Task ...
+    *
+    * The Future basically needs to wrap over a Try or an Either. Then, wrap the run of the Future in a try catch,
+    * and if an exception is thrown propagate the Left or Failure result instead.
+    */
+
+  /** Exercise 11
+    *
+    * Implement choiceN and then choice in terms of it
+    */
+  def choiceN[A](n: Par[Int])(choices: List[Par[A]]): Par[A] = es => choices(run(es)(n))(es)
+
+  def choice[A](cond: Par[Boolean])(t: Par[A], f: Par[A]): Par[A] = choiceN(map(cond) {
+    if (_) 1 else 0
+  })(List(t, f))
+
+  /** Exercise 12
+    *
+    * Implement choiceMap
+    */
+  def choiceMap[K, V](key: Par[K])(choices: Map[K, Par[V]]): Par[V] = es => choices(run(es)(key))(es)
+
+  /** Exercise 13
+    *
+    * Implement chooser, then re-implement choice, choiceN and choiceMap in terms of it
+    */
+  def chooser[A, B](pa: Par[A])(choices: A => Par[B]): Par[B] = { es => choices(run(es)(pa))(es) }
+
+  def choiceN2[A](n: Par[Int])(choices: List[Par[A]]): Par[A] = chooser(n)(choices)
+
+  def choice2[A](cond: Par[Boolean])(t: Par[A], f: Par[A]): Par[A] = chooser(cond) {
+    if (_) t else f
+  }
+
+  def choiceMap2[K, V](key: Par[K])(choices: Map[K, Par[V]]): Par[V] = chooser(key)(choices)
+
+  def run[A](es: ExecutorService)(a: Par[A]): A = a(es).get
+
+  /** Exercise 14
+    *
+    * Implement join. Implement flatMap in terms of join. Implement join in terms of flatMap.
+    */
+  def join[A](a: Par[Par[A]]): Par[A] = { es => run(es)(a)(es) }
+
+  def flatMap[A, B](a: Par[A])(f: A => Par[B]) = join(map(a)(f))
+
+  def join2[A](a: Par[Par[A]]): Par[A] = flatMap(a)(identity)
+
   def main(args: Array[String]): Unit = {
-    println(map(unit(1))(_ + 1) == unit(2))// some point they are equal
+    println(map(unit(1))(_ + 1) == unit(2))
+    // some point they are equal
     val executorService: ExecutorService = Executors.newCachedThreadPool()
     println(equal(executorService)(map(unit(1))(_ + 1), unit(2)))
   }
