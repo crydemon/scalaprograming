@@ -43,7 +43,7 @@ object p1 extends App {
 }
 
 //Find the last but one element of a list.
-object p2 extends App {
+object p2_p3 extends App {
   def lastNthBuiltin[A](n: Int, ls: List[A]): A = {
     if (n <= 0) throw new IllegalArgumentException
     if (ls.length < n) throw new NoSuchElementException
@@ -69,4 +69,68 @@ object p2 extends App {
   }
 
   println(lastNth1(3, List(1, 3, 45, 6, 3, 34, 32, 54)))
+}
+
+object p4 extends App {
+  def length(xs: List[Int]): Int = {
+    @tailrec
+    def go(n: Int, xs: List[Int]): Int = {
+      if (xs.isEmpty) n
+      else {
+        go(n + 1, xs.tail)
+      }
+    }
+
+    go(0, xs)
+  }
+
+  println(length(List.fill(100000000)(10)))
+}
+
+object p5 extends App {
+  def reverse(xs: List[Int]): List[Int] = {
+    xs match {
+      case Nil => Nil
+      case h :: t => reverse(t) ::: List(h)
+    }
+  }
+
+  def reverse1[A](xs: List[A]): List[A] = {
+    def go(result: List[A], curList: List[A]): List[A] = curList match {
+      case Nil => result
+      case h :: t => go(h :: result, t)
+    }
+
+    go(Nil, xs)
+  }
+
+
+  def reverse2[A](xs: List[A]): List[A] = {
+    xs.foldLeft(List[A]())((r, h) => h :: r)
+  }
+
+  @tailrec
+  def foldLeft[A, B](l: List[A], z: B)(f: (B, A) => B): B = l match {
+    case Nil => z
+    case h :: t => foldLeft(t, f(z, h))(f)
+  }
+
+  def reverse3[A](l: List[A]): List[A] =
+    foldLeft(l, List[A]())((acc, h) => h :: acc)
+
+  val xs = List.fill(10)(scala.util.Random.nextInt(100))
+  println(xs)
+  println(reverse3(xs))
+}
+
+object p6 extends App {
+  def isPalindrome[A](xs: List[A]): Boolean = {
+    xs.foldLeft(List[A]())((acc, h) => h :: acc) == xs
+  }
+
+  val xs = List.fill(10)(scala.util.Random.nextInt(100))
+  println(xs)
+  println(isPalindrome(xs))
+  println(isPalindrome(List(1, 2, 3, 2, 1)))
+  println(isPalindrome(List(1, 2, 2, 1)))
 }
