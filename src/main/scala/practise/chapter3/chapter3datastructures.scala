@@ -140,8 +140,7 @@ object List {
   def foldLeftViaFoldRight[A, B](l: List[A], z: B)(f: (B, A) => B): B =
     foldRight(l, (b: B) => b)((a, g) => b => g(f(b, a)))(z)
 
-  def concat[A](l: List[List[A]]): List[A] =
-    foldRightViaFoldLeft(l, Nil: List[A])(append)
+
 
   def addOne(l: List[Int]): List[Int] =
     foldRight(l, Nil: List[Int])((h, t) => Cons(h + 1, t))
@@ -149,8 +148,7 @@ object List {
   def doubleToString(l: List[Double]): List[String] =
     foldRight(l, Nil: List[String])((h, t) => Cons(h.toString, t))
 
-  def map[A, B](l: List[A])(f: A => B): List[B] =
-    foldRight(l, Nil: List[B])((h, t) => Cons(f(h), t))
+
 
   def map1[A, B](as: List[A])(f: A => B): List[B] =
     as match {
@@ -176,6 +174,12 @@ object List {
 
   def filter[A](as: List[A])(f: A => Boolean): List[A] =
     foldRight(as, Nil: List[A])((h, t) => if (f(h)) Cons(h, t) else t)
+
+  def map[A, B](l: List[A])(f: A => B): List[B] =
+    foldRight(l, Nil: List[B])((h, t) => Cons(f(h), t))
+
+  def concat[A](l: List[List[A]]): List[A] =
+    foldRightViaFoldLeft(l, Nil: List[A])(append)
 
   def flatMap[A, B](as: List[A])(f: A => List[B]): List[B] =
     concat(map(as)(f))
