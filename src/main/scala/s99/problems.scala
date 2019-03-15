@@ -270,3 +270,80 @@ object p12 extends App {
   val l = decode(List((4, 'a), (1, 'b), (2, 'c), (2, 'a), (1, 'd), (4, 'e)))
   print(l)
 }
+
+object p13 extends App {
+  def encodeDirect[A](xs: List[A]): List[(Int, A)] = xs match {
+    case Nil => Nil
+    case h :: _ => {
+      val (h1, t1) = xs span (_ == h)
+      (h1.length, h) :: encodeDirect(t1)
+    }
+  }
+
+  def encodeDirect1[A](xs: List[A]): List[(Int, A)] = {
+
+    def go(result: List[(Int, A)], curList: List[A]): List[(Int, A)] = curList match {
+      case Nil => result.reverse
+      case h :: t => {
+        val (h1, t1) = t span (_ == h)
+        println((h1, t1))
+        val h2 = (h1.length + 1, h)
+        go(h2 :: result, t1)
+      }
+    }
+
+    go(Nil, xs)
+  }
+
+  println(encodeDirect(List('a, 'a, 'a, 'a, 'b, 'c, 'c, 'a, 'a, 'd, 'e, 'e, 'e, 'e)))
+  println(encodeDirect1(List('a, 'a, 'a, 'a, 'b, 'c, 'c, 'a, 'a, 'd, 'e, 'e, 'e, 'e)))
+}
+
+object p14 extends App {
+  def duplicate[A](xs: List[A]): List[A] = xs match {
+    case Nil => Nil
+    case h :: t => h :: h :: duplicate(t)
+  }
+
+  def duplicate1[A](xs: List[A]): List[A] = {
+    def go(result: List[A], curList: List[A]): List[A] = curList match {
+      case Nil => result.reverse
+      case h :: t => go(h :: h :: result, t)
+    }
+
+    go(Nil, xs)
+  }
+
+  def duplicate2[A](xs: List[A]): List[A] = {
+    xs flatMap (e => List(e, e))
+  }
+
+  println(duplicate(List('a, 'b, 'c, 'c, 'd)))
+  println(duplicate1(List('a, 'b, 'c, 'c, 'd)))
+}
+
+object p15 extends App {
+
+  def duplicateN[A](n: Int, xs: List[A]): List[A] = xs match {
+    case Nil => Nil
+    case h :: t => List.fill(n)(h) ++ duplicateN(n, t)
+  }
+
+  def duplicateN1[A](n: Int, xs: List[A]): List[A] = {
+    def go(result: List[A], curList: List[A]): List[A] = curList match {
+      case Nil => result.reverse
+      case h :: t => {
+        go(List.fill(n)(h) ++ result, t)
+      }
+    }
+
+    go(Nil, xs)
+  }
+
+  def duplicateN2[A](n: Int, xs: List[A]): List[A] = {
+    xs.flatMap(e => List.fill(n)(e))
+  }
+  println(duplicateN(3, List('a, 'b, 'c, 'c, 'd)))
+  println(duplicateN1(3, List('a, 'b, 'c, 'c, 'd)))
+  println(duplicateN2(3, List('a, 'b, 'c, 'c, 'd)))
+}
