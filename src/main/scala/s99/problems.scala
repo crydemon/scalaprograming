@@ -343,7 +343,96 @@ object p15 extends App {
   def duplicateN2[A](n: Int, xs: List[A]): List[A] = {
     xs.flatMap(e => List.fill(n)(e))
   }
+
   println(duplicateN(3, List('a, 'b, 'c, 'c, 'd)))
   println(duplicateN1(3, List('a, 'b, 'c, 'c, 'd)))
   println(duplicateN2(3, List('a, 'b, 'c, 'c, 'd)))
+}
+
+object p16 extends App {
+  def dropRecursive[A](n: Int, ls: List[A]): List[A] = {
+    def dropR(c: Int, curList: List[A]): List[A] = (c, curList) match {
+      case (_, Nil) => Nil
+      case (1, _ :: tail) => dropR(n, tail)
+      case (_, h :: tail) => h :: dropR(c - 1, tail)
+    }
+
+    dropR(n, ls)
+  }
+
+  def drop1[A](n: Int, xs: List[A]): List[A] = {
+    def go(result: List[A], c: Int, curList: List[A]): List[A] = (c, curList) match {
+      case (_, Nil) => result.reverse
+      case (1, _ :: t) => go(result, n, t)
+      case (_, h :: t) => go(h :: result, c - 1, t)
+    }
+
+    go(Nil, n, xs)
+  }
+
+  def drop2[A](n: Int, xs: List[A]): List[A] = {
+    xs.zipWithIndex.filter(v => (v._2 + 1) % n != 0).map(v => v._1)
+  }
+
+  println(dropRecursive(3, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k)))
+  println(drop1(3, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k)))
+  println(drop2(3, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k)))
+}
+
+object p17 extends App {
+  def split[A](n: Int, xs: List[A]): (List[A], List[A]) = (n, xs) match {
+    case (_, Nil) => (Nil, Nil)
+    case (0, l) => (Nil, l)
+    case (n, h :: t) => {
+      val (pre, post) = split(n - 1, t)
+      println((pre, post))
+      (h :: pre, post)
+    }
+  }
+
+  def split1[A](n: Int, xs: List[A]): (List[A], List[A]) = {
+    def go(curN: Int, curL: List[A], pre: List[A]): (List[A], List[A]) = (curN, curL) match {
+      case (_, Nil) => (pre.reverse, Nil)
+      case (0, l) => (pre.reverse, l)
+      case (n, h :: t) => go(n - 1, t, h :: pre)
+    }
+
+    go(n, xs, Nil)
+  }
+
+  def split2[A](n: Int, xs: List[A]): (List[A], List[A]) = {
+    (xs.take(n), xs.drop(n))
+  }
+
+  println(split(3, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k)))
+  println(split1(3, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k)))
+  println(split2(3, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k)))
+}
+
+object p18 extends App {
+  def slice[A](s: Int, e: Int, xs: List[A]): List[A] = {
+    xs.take(e).drop(s)
+  }
+
+  def slice1[A](s: Int, e: Int, xs: List[A]): List[A] = (s, e, xs) match {
+    case (_, _, Nil) => Nil
+    case (_, e, _) if e <= 0 => Nil //终止条件
+    case (s, e, h :: t) if s <= 0 => h :: slice1(0, e - 1, t) //开始条件
+    case (s, e, _ :: t) => slice1(s - 1, e - 1, t)
+  }
+
+  // Since several of the patterns are similar, we can condense the tail recursive
+  // solution a little.
+  def sliceTailRecursive2[A](start: Int, end: Int, ls: List[A]): List[A] = {
+    def sliceR(count: Int, curList: List[A], result: List[A]): List[A] = {
+      if (curList.isEmpty || count >= end) result.reverse
+      else sliceR(count + 1, curList.tail,
+        if (count >= start) curList.head :: result
+        else result)
+    }
+    sliceR(0, ls, Nil)
+  }
+
+  println(slice(3, 7, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k)))
+  println(slice1(3, 7, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k)))
 }
