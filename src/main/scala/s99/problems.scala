@@ -1,6 +1,7 @@
 package s99
 
 import scala.annotation.tailrec
+import scala.reflect.ClassTag
 
 // Find the last element of a list.
 object p1 extends App {
@@ -430,9 +431,155 @@ object p18 extends App {
         if (count >= start) curList.head :: result
         else result)
     }
+
     sliceR(0, ls, Nil)
   }
 
   println(slice(3, 7, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k)))
   println(slice1(3, 7, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k)))
+}
+
+object p19 extends App {
+  def rotate[A](n: Int, xs: List[A]): List[A] = {
+    val l = (n + xs.length) % xs.length
+    xs.drop(l) ::: xs.take(l)
+  }
+
+  println(List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k))
+  println(rotate(3, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k)))
+  println(rotate(-2, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k)))
+}
+
+object p20 extends App {
+  def removeAt[A](n: Int, xs: List[A]): (List[A], A) = xs.splitAt(n) match {
+    case (Nil, _) if n < 0 => throw new NoSuchElementException
+    case (pre, e :: post) => (pre ::: post, e)
+    case (_, Nil) => throw new NoSuchElementException
+  }
+
+  def removeAt1[A](n: Int, xs: List[A]): (List[A], A) = {
+    if (n < 0) throw new NoSuchElementException
+    else (n, xs) match {
+      case (_, Nil) => throw new NoSuchElementException
+      case (0, h :: tail) => (tail, h)
+      case (_, h :: tail) => {
+        val (t, e) = removeAt1(n - 1, tail)
+        (h :: t, e)
+      }
+    }
+  }
+
+  println(removeAt(1, List('a, 'b, 'c, 'd)))
+  println(removeAt1(1, List('a, 'b, 'c, 'd)))
+}
+
+object p21 extends App {
+  def insertAt[A](a: A, n: Int, xs: List[A]): List[A] = {
+    xs.take(n) ::: (a :: xs.drop(n))
+  }
+
+  println(insertAt('new, 1, List('a, 'b, 'c, 'd)))
+}
+
+object p22 extends App {
+
+  def range(s: Int, e: Int): List[Int] = {
+    if (s > e) Nil
+    else s :: range(s + 1, e)
+  }
+
+  def range1(s: Int, e: Int): List[Int] = {
+    def go(e: Int, result: List[Int]): List[Int] = {
+      if (e < s) result
+      else go(e - 1, e :: result)
+    }
+
+    go(e, Nil)
+  }
+
+  def foldRight[A, B](as: List[A], z: B)(f: (A, B) => B): B =
+    as match {
+      case Nil => z
+      case x :: xs => f(x, foldRight(xs, z)(f))
+    }
+
+  def unfoldRight[A, B](s: B)(f: B => Option[(A, B)]): List[A] = f(s) match {
+    case None => Nil
+    case Some((r, n)) => r :: unfoldRight(n)(f)
+  }
+
+  def range2(s: Int, e: Int): List[Int] = {
+    unfoldRight(s) { n =>
+      if (n > e) None
+      else Some((n, n + 1))
+    }
+  }
+
+  println(range(4, 4))
+  println(range1(4, 4))
+  println(range2(4, 10))
+}
+
+
+object p23 extends App {
+  def removeAt[A](n: Int, xs: List[A]): (List[A], A) = xs.splitAt(n) match {
+    case (Nil, _) if n < 0 => throw new NoSuchElementException
+    case (pre, e :: post) => (pre ::: post, e)
+    case (_, Nil) => throw new NoSuchElementException
+  }
+
+  def randomSelect[A](n: Int, xs: List[A]): List[A] = {
+    if (n < 0) Nil
+    else {
+      val (rest, e) = removeAt((util.Random).nextInt(xs.length), xs)
+      e :: randomSelect(n - 1, rest)
+    }
+  }
+
+  def range1(s: Int, e: Int): List[Int] = {
+    def go(e: Int, result: List[Int]): List[Int] = {
+      if (e < s) result
+      else go(e - 1, e :: result)
+    }
+
+    go(e, Nil)
+  }
+
+  def randomSelect1[A](n: Int, xs: List[A]): List[A] = {
+    def randomSelectR(n: Int, xs: List[A], r: util.Random): List[A] =
+      if (n <= 0) Nil
+      else {
+        val (rest, e) = removeAt(r.nextInt(xs.length), xs)
+        e :: randomSelectR(n - 1, rest, r)
+      }
+
+    randomSelectR(n, xs, util.Random)
+  }
+
+  def lotto(count: Int, max: Int): List[Int] =
+    randomSelect1(count, range1(1, max))
+
+  def randomPermute[A](xs: List[A]): List[A] = {
+    randomSelect1(xs.length, xs)
+  }
+
+  //To instantiate an array in a generic context (instantiating an array of T where T is a type parameter),
+  // Scala needs to have information at runtime about T, in the form of an implicit value of type ClassTag[T].
+  // Concretely, you need the caller of your method to (implicitly) pass this ClassTag value,
+  // which can conveniently be done using a context bound:
+  def randomPermute1[A: ClassTag](xs: List[A]): List[A] = {
+    val a: Array[A] = xs.toArray
+    for (i <- a.length - 1 to 1 by -1) {
+      val i1 = util.Random.nextInt(i + 1)
+      val t = a(i)
+      a.update(i, a(i1))
+      a.update(i1, t)
+    }
+    a.toList
+  }
+
+
+
+  //println(lotto(6, 49))
+  println(randomPermute1(List('a, 'b, 'c, 'd, 'e, 'f)))
 }
