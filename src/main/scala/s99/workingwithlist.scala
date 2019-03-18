@@ -3,6 +3,8 @@ package s99
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
 
+//http://aperiodic.net/phil/scala/s-99/
+
 // Find the last element of a list.
 object p1 extends App {
   @tailrec
@@ -579,7 +581,98 @@ object p23 extends App {
   }
 
 
-
   //println(lotto(6, 49))
   println(randomPermute1(List('a, 'b, 'c, 'd, 'e, 'f)))
+}
+
+
+//全排列
+//一个元素要么被选中，要么不被选中
+object p26 extends App {
+  def combinations[A: ClassTag](n: Int, xs: List[A]): List[List[A]] = {
+    var result: List[List[A]] = Nil
+    val one: Array[A] = new Array[A](n)
+
+    def next_c(li: Int, ni: Int): List[List[A]] = {
+      if (ni == n) {
+        result = one.toList :: result
+      } else {
+        for (lj <- li to xs.length - 1) {
+          one.update(ni, xs(lj))
+          next_c(lj + 1, ni + 1)
+        }
+      }
+      result
+    }
+
+    next_c(0, 0)
+  }
+
+  //@符号在scala编译中做了一个模式配置的工作,将字符串做了比对,如果值相等,将将这个值取到赋值给变量;如果值不相等,匹配不上,就报一个异常.
+  // flatMapSublists is like list.flatMap, but instead of passing each element
+  // to the function, it passes successive sublists of L.
+  def flatMapSubLists[A, B](xs: List[A])(f: (List[A] => List[B])): List[B] = xs match {
+    case Nil => Nil
+    case subList@(_ :: tail) => f(subList) ::: flatMapSubLists(tail)(f)
+  }
+
+  def combinations1[A](n: Int, xs: List[A]): List[List[A]] =
+    if (n == 0) List(Nil)
+    else flatMapSubLists(xs)(s1 => combinations1(n - 1, s1.tail) map (s1.head :: _))
+
+
+  println(combinations1(3, List('a, 'b, 'c, 'd, 'e, 'f)).length)
+  combinations1(3, List('a, 'b, 'c, 'd, 'e, 'f)).foreach(x => println(x))
+
+  println(combinations(3, List('a, 'b, 'c, 'd, 'e, 'f)).length)
+  combinations(3, List('a, 'b, 'c, 'd, 'e, 'f)).foreach(x => println(x))
+}
+
+object p27 extends App {
+  def flatMapSubLists[A, B](xs: List[A])(f: (List[A] => List[B])): List[B] = xs match {
+    case Nil => Nil
+    case subList@(_ :: tail) => f(subList) ::: flatMapSubLists(tail)(f)
+  }
+
+  def combinations1[A](n: Int, xs: List[A]): List[List[A]] =
+    if (n == 0) List(Nil)
+    else flatMapSubLists(xs)(s1 => combinations1(n - 1, s1.tail) map (s1.head :: _))
+
+  //Union union 并
+  //Intersection intersect 交
+  //Differences diff 差
+  def group3[A](xs: List[A]): List[List[List[A]]] =
+    for {
+      a <- combinations1(2, xs)
+      noA = xs.diff(a)
+      b <- combinations1(3, noA)
+    } yield List(a, b, noA.diff(b))
+
+
+  def group[A](ns: List[Int], xs: List[A]): List[List[List[A]]] = ns match {
+    case Nil => List(Nil)
+    case n :: t => combinations1(n, xs) flatMap (c =>
+      group(t, xs.diff(c)) map (c :: _)
+      )
+  }
+
+  group(List(1, 3, 5), List("Aldo", "Beat", "Carla", "David", "Evi", "Flip", "Gary", "Hugo", "Ida")).foreach(println)
+  group3(List("Aldo", "Beat", "Carla", "David", "Evi", "Flip", "Gary", "Hugo", "Ida")).foreach(println)
+
+}
+
+object p28 extends App {
+  def lsort[A](ns: List[List[A]]): List[List[A]] =
+    ns.sortBy(r => r.length)
+
+
+  def lsortFreq[A](ls: List[List[A]]): List[List[A]] = {
+    val tmp = ls map (l => (l, l.length))
+    val lens = tmp.map(l => l._2)
+    val freq = tmp map (l => (l._1, lens.count(x => x == l._2)))
+    freq sortBy (r => r._2) map (l => l._1)
+  }
+
+  println(lsortFreq(List(List('a, 'b, 'c), List('d, 'e), List('f, 'g, 'h), List('d, 'e), List('i, 'j, 'k, 'l), List('m, 'n), List('o))))
+  println(lsort(List(List('a, 'b, 'c), List('d, 'e), List('f, 'g, 'h), List('d, 'e), List('i, 'j, 'k, 'l), List('m, 'n), List('o))))
 }
