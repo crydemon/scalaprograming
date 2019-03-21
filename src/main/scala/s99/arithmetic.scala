@@ -1,7 +1,7 @@
 package s99
 
 
-package arithmetic {
+package s99 {
 
   class S99Int(val start: Int) {
 
