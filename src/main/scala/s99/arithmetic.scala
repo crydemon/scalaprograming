@@ -87,9 +87,19 @@ package arithmetic {
 
     def gcd(m: Int, n: Int): Int = if (n == 0) m else gcd(n, m % n)
 
+    def printGoldbachList(l: Int, r: Int): Unit = {
+      (l to r) filter (_ % 2 == 0) map (_.goldbach) foreach (println)
+    }
+
+    def printGoldbachListLimited(r: Range, limit: Int): Unit = {
+      (math.max(r.head, limit) to r.last) filter (_ % 2 == 0) map (_.goldbach) filter (x => x._2 > limit && x._1 > limit) foreach (x => println(s"${x._1 + x._2}=${x._1}+${x._2}"))
+    }
+
 
     def main(args: Array[String]): Unit = {
-      println(28.goldbach)
+      printGoldbachListLimited(1 to 2000, 50)
+      //printGoldbachList(9, 20)
+      // println(28.goldbach)
       //      println(10.totient)
       //      println(23.isCoprimeTo(24))
       //      println(gcd(24, 3))
