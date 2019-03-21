@@ -1,4 +1,4 @@
-package practise.chapter5
+package fpinscala.chapter5
 
 //提升内存效率的流式计算
 //惰性化分离了表达式的描述和求值

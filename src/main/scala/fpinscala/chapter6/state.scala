@@ -1,6 +1,6 @@
-package practise.chapter6
+package fpinscala.chapter6
 
-import practise.chapter6.RNG.SimpleRNG
+import fpinscala.chapter6.RNG.SimpleRNG
 
 trait RNG {
   def nextInt: (Int, RNG)
@@ -221,7 +221,7 @@ object State {
 
 object test extends App {
 
-  import practise.chapter6.RNG._
+  import fpinscala.chapter6.RNG._
 
 
   val rng = SimpleRNG(43)
@@ -248,7 +248,7 @@ case class Machine(locked: Boolean, candies: Int, coins: Int)
 
 object Candy {
 
-  import practise.chapter6.State._
+  import fpinscala.chapter6.State._
 
   def update = (i: Input) => (s: Machine) =>
     (i, s) match {

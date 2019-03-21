@@ -1,4 +1,4 @@
-package practise.chapter7
+package fpinscala.chapter7
 
 import java.util.concurrent._
 

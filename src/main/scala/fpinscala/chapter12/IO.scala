@@ -1,4 +1,4 @@
-package practise.chapter12
+package fpinscala.chapter12
 
 sealed trait IO[A] {
 

@@ -1,4 +1,4 @@
-package practise.chapter3
+package fpinscala.chapter3
 
 //函数式数据结构，只能被纯函数操作
 

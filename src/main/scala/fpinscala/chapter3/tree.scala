@@ -1,4 +1,4 @@
-package practise.chapter3
+package fpinscala.chapter3
 
 sealed trait Tree[+A]
 

@@ -1,4 +1,4 @@
-package practise.chapter10
+package fpinscala.chapter10
 
 
 trait Monoid[A] {

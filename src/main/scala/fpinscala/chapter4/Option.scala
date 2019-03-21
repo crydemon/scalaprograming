@@ -1,6 +1,6 @@
-package practise.chapter4
+package fpinscala.chapter4
 
-import practise.chapter4.Option.sequence
+import fpinscala.chapter4.Option.sequence
 
 import scala.{Either => _, Option => _, Some => _, _}
 // hide std library `Option`, `Some` and `Either`,

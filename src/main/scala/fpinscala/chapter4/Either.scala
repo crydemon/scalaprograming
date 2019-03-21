@@ -1,4 +1,4 @@
-package practise.chapter4
+package fpinscala.chapter4
 
 import scala.{Option => _, Either => _, Left => _, Right => _, _}
 

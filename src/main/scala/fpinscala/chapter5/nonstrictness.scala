@@ -1,4 +1,4 @@
-package practise.chapter5
+package fpinscala.chapter5
 
 //by name
 object nonstrictness extends App {

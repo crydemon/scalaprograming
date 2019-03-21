@@ -1,4 +1,4 @@
-package practise.chapter9
+package fpinscala.chapter9
 
 import ReferenceTypes._
 import scala.util.matching.Regex

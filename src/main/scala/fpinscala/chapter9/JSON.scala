@@ -1,6 +1,6 @@
-package practise.chapter9
+package fpinscala.chapter9
 
-import practise.chapter9.ReferenceTypes.Parser
+import fpinscala.chapter9.ReferenceTypes.Parser
 
 import language.higherKinds
 import language.implicitConversions

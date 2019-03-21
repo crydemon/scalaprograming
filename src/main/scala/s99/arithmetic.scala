@@ -115,7 +115,7 @@ package s99 {
 
 object P38 extends App {
 
-  import arithmetic.S99Int._
+  import s99.S99Int._
 
   def time[A](label: String)(block: => A): A = {
     val now = System.currentTimeMillis()
