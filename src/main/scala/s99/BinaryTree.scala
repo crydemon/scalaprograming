@@ -9,7 +9,12 @@ sealed abstract class Tree[+T] {
   def addValue[U >: T <% Ordered[U]](x: U): Tree[U]
 
   def nodeCount: Int
+
   def leafCount: Int
+
+  def internalList: List[T]
+
+  def atLevel(level: Int): List[T]
 }
 
 case class Node[+T](value: T, left: Tree[T], right: Tree[T]) extends Tree[T] {
@@ -29,9 +34,20 @@ case class Node[+T](value: T, left: Tree[T], right: Tree[T]) extends Tree[T] {
   def nodeCount: Int = left.nodeCount + right.nodeCount + 1
 
   def leafCount: Int = {
-   if (left == End && right == End)
+    if (left == End && right == End)
       1
     else left.leafCount + right.leafCount
+  }
+
+  override def internalList: List[T] = (left, right) match {
+    case (End, End) => Nil
+    case _ => value :: left.internalList ::: right.internalList
+  }
+
+  override def atLevel(level: Int): List[T] = level match {
+    case n if n < 1 => Nil
+    case 1 => List(value)
+    case n => left.atLevel(n - 1) ::: right.atLevel(n - 1)
   }
 }
 
@@ -48,6 +64,11 @@ case object End extends Tree[Nothing] {
   def nodeCount: Int = 0
 
   def leafCount: Int = 0
+
+  def internalList = Nil
+
+  def atLevel(level: Int) = Nil
+
 }
 
 object Node {
@@ -91,7 +112,7 @@ object Tree {
 
   def hbalTrees[T](height: Int, value: T): List[Tree[T]] = height match {
     case n if n < 1 => List(End)
-    case 1          => List(Node(value))
+    case 1 => List(Node(value))
     case _ => {
       val fullHeight = hbalTrees(height - 1, value)
       val short = hbalTrees(height - 2, value)
@@ -103,16 +124,24 @@ object Tree {
   def hbalTreesWithNodes[T](nodes: Int, value: T): List[Tree[T]] =
     (minHbalHeight(nodes) to maxHbalHeight(nodes)).flatMap(hbalTrees(_, value)).filter(_.nodeCount == nodes).toList
 
+  def completeBinaryTree[T](nodes: Int, value: T): Tree[T] = {
+    def generateTree(addr: Int): Tree[T] = {
+      if (addr > nodes) End
+      else Node(value, generateTree(2 * addr), generateTree(2 * addr + 1))
+    }
 
-
+    generateTree(1)
+  }
 
   def main(args: Array[String]): Unit = {
-    println(Node('x', Node('x'), End).leafCount)
-    println( Tree.hbalTreesWithNodes(4, "x"))
-//    val res = End.addValue(2)
-//    println(res)
-//    println(res.addValue(3))
-//    println(res.addValue(3).addValue(0))
+    println(Node('a', Node('b'), Node('c', Node('d'), Node('e'))).atLevel(2))
+    //println(Node('a', Node('b'), Node('c', Node('d'), Node('e'))).internalList)
+    //println(Node('x', Node('x'), End).leafCount)
+    //println(Tree.hbalTreesWithNodes(4, "x"))
+    //    val res = End.addValue(2)
+    //    println(res)
+    //    println(res.addValue(3))
+    //    println(res.addValue(3).addValue(0))
     //    println(Node('T', Node('b'), Node('c')).isSymmetric)
     //    println(cBalanced(13, "x").length)
   }
