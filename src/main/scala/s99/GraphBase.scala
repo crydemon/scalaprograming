@@ -1,5 +1,7 @@
 package s99
 
+import scala.reflect.ClassTag
+
 //一个图应该有边，顶点，它们都是独立的，可以作为case class ,并且可以加入 新的节点
 //应该给新类重写equals方法
 //为什么不将加入边作为图最基本的行为呢
@@ -10,7 +12,7 @@ abstract class GraphBase[T, U] {
 
     override def toString = value match {
       case () => n1.value + edgeSep + n2.value
-      case v  => n1.value + edgeSep + n2.value + labelSep + v
+      case v => n1.value + edgeSep + n2.value + labelSep + v
     }
   }
 
@@ -22,11 +24,14 @@ abstract class GraphBase[T, U] {
       edges.foldLeft((Nil: List[String], nodes.values.toList))((r, e) => (e.toString :: r._1, r._2.filter((n) => n != e.n1 && n != e.n2)))
     "[" + (unlinkedNodes.map(_.value.toString) ::: edgeStrs).mkString(", ") + "]"
   }
+
   def toTermForm: (List[T], List[(T, T, U)]) =
     (nodes.keys.toList, edges.map((e) => (e.n1.value, e.n2.value, e.value)))
+
   def toAdjacentForm: List[(T, List[(T, U)])] =
     nodes.values.toList.map((n) => (n.value, n.adj.map((e) =>
       (edgeTarget(e, n).get.value, e.value))))
+
   //用邻接矩阵的方式存储
   case class Node(value: T) {
     var adj: List[Edge] = Nil
@@ -50,11 +55,22 @@ abstract class GraphBase[T, U] {
     nodes = Map(value -> n) ++ nodes
     n
   }
+
+  def findPaths(source: T, dest: T): List[List[T]] = {
+    def findPathsR(curNode: Node, curPath: List[T]): List[List[T]] = {
+      if (curNode.value == dest) List(curPath)
+      else curNode.adj.map(edgeTarget(_, curNode).get).filter(n => !curPath.contains(n.value)).flatMap(n => findPathsR(n, n.value :: curPath))
+    }
+
+    findPathsR(nodes(source), List(source)).map(_.reverse)
+  }
+
 }
 
 //无向图
 class Graph[T, U] extends GraphBase[T, U] {
   val edgeSep: String = "-"
+
   override def equals(o: Any) = o match {
     case g: Graph[_, _] => super.equals(g)
     case _ => false
@@ -73,9 +89,11 @@ class Graph[T, U] extends GraphBase[T, U] {
     nodes(n2).adj = e :: nodes(n2).adj
   }
 }
+
 //有向图
 class Digraph[T, U] extends GraphBase[T, U] {
   val edgeSep: String = ">"
+
   override def equals(o: Any): Boolean = o match {
     case g: Digraph[_, _] => super.equals(g)
     case _ => false
@@ -129,6 +147,7 @@ abstract class GraphObjBase {
 object Graph extends GraphObjBase {
   type GraphClass[T, U] = Graph[T, U]
   val edgeSep: String = "-"
+
   def termLabel[T, U](nodes: List[T], edges: List[(T, T, U)]) = {
     val g = new Graph[T, U]
     nodes.map(g.addNode)
@@ -164,13 +183,14 @@ object Graph extends GraphObjBase {
   }
 
   def main(args: Array[String]): Unit = {
-    println( Graph.fromString("[b-c, f-c, g-h, d, f-b, k-f, h-g]").toTermForm)
+    println(Graph.fromString("[b-c, f-c, g-h, d, f-b, k-f, h-g]").toTermForm)
   }
 }
 
 object Digraph extends GraphObjBase {
   type GraphClass[T, U] = Digraph[T, U]
   val edgeSep: String = ">"
+
   def termLabel[T, U](nodes: List[T], edges: List[(T, T, U)]) = {
     val g = new Digraph[T, U]
     nodes.map(g.addNode)
@@ -198,7 +218,9 @@ object Digraph extends GraphObjBase {
     g
   }
 
+
   def main(args: Array[String]): Unit = {
-    println(Digraph.fromStringLabel("[p>q/9, m>q/7, k, p>m/5]").toAdjacentForm)
+    println(Digraph.fromStringLabel("[p>q/9, m>q/7, k, p>m/5]").findPaths("p", "q"))
+    //println(Digraph.fromStringLabel("[p>q/9, m>q/7, k, p>m/5]").toAdjacentForm)
   }
 }
