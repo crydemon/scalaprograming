@@ -1,6 +1,5 @@
 package s99
 
-import scala.reflect.ClassTag
 
 //一个图应该有边，顶点，它们都是独立的，可以作为case class ,并且可以加入 新的节点
 //应该给新类重写equals方法
@@ -45,7 +44,7 @@ abstract class GraphBase[T, U] {
   def edgeTarget(e: Edge, n: Node): Option[Node]
 
   override def equals(o: Any) = o match {
-    case g: GraphBase[_, _] => (nodes.keys.toList.diff(g.nodes.toList) == Nil &&
+    case g: GraphBase[_, _] => (nodes.keys.toList.diff(g.nodes.keys.toList) == Nil &&
       edges.map(_.toTuple).diff(g.edges.map(_.toTuple)) == Nil)
     case _ => false
   }
@@ -65,11 +64,42 @@ abstract class GraphBase[T, U] {
     findPathsR(nodes(source), List(source)).map(_.reverse)
   }
 
+  def findCycles(source: T): List[List[T]] = {
+    val n = nodes(source)
+    n.adj.map(edgeTarget(_, n).get.value).flatMap(findPaths(_, source)).map(source :: _).filter(_.lengthCompare(3) > 0)
+  }
+
 }
 
 //无向图
 class Graph[T, U] extends GraphBase[T, U] {
   val edgeSep: String = "-"
+
+  // edgeConnectsToGraph is needed for P84, so it's not an internal function.
+  def edgeConnectsToGraph[T, U](e: Edge, nodes: List[Node]): Boolean =
+    !(nodes.contains(e.n1) == nodes.contains(e.n2)) // xor
+  def spanningTrees = {
+    def spanningTreesR(graphEdges: List[Edge], graphNodes: List[Node], treeEdges: List[Edge]): List[Graph[T, U]] = {
+      if (graphNodes == Nil) List(Graph.termLabel(nodes.keys.toList, treeEdges.map(_.toTuple)))
+      else if (graphEdges == Nil) Nil
+      else graphEdges.filter(edgeConnectsToGraph(_, graphNodes)) flatMap { ge =>
+        spanningTreesR(graphEdges.filterNot(_ == ge),
+          graphNodes.filter(edgeTarget(ge, _) == None),
+          ge :: treeEdges)
+      }
+    }
+
+    def removeDuplicate(dup: List[Graph[T, U]], result: List[Graph[T, U]]): List[Graph[T, U]] = dup match {
+      case h :: t => removeDuplicate(t.filterNot(i => h.equals(i)), h :: result)
+      case _ => result
+    }
+
+    removeDuplicate(spanningTreesR(edges, nodes.values.toList.tail, Nil), Nil)
+  }
+
+  def isTree: Boolean = spanningTrees.lengthCompare(1) == 0
+
+  def isConnected: Boolean = spanningTrees.lengthCompare(0) > 0
 
   override def equals(o: Any) = o match {
     case g: Graph[_, _] => super.equals(g)
@@ -183,7 +213,8 @@ object Graph extends GraphObjBase {
   }
 
   def main(args: Array[String]): Unit = {
-    println(Graph.fromString("[b-c, f-c, g-h, d, f-b, k-f, h-g]").toTermForm)
+    println(Graph.fromString("[a-b, b-c, a-c]").spanningTrees)
+    //println(Graph.fromString("[b-c, f-c, g-h, d, f-b, k-f, h-g]").toTermForm)
   }
 }
 
