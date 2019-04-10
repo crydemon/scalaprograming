@@ -6,6 +6,8 @@ package s99
 //为什么不将加入边作为图最基本的行为呢
 abstract class GraphBase[T, U] {
 
+
+
   case class Edge(n1: Node, n2: Node, value: U) {
     def toTuple = (n1.value, n2.value, value)
 
@@ -69,6 +71,8 @@ abstract class GraphBase[T, U] {
     n.adj.map(edgeTarget(_, n).get.value).flatMap(findPaths(_, source)).map(source :: _).filter(_.lengthCompare(3) > 0)
   }
 
+
+
 }
 
 //无向图
@@ -96,6 +100,21 @@ class Graph[T, U] extends GraphBase[T, U] {
 
     removeDuplicate(spanningTreesR(edges, nodes.values.toList.tail, Nil), Nil)
   }
+
+  def minimalSpanningTree(implicit f: (U) => Ordered[U]): Graph[T, U] = {
+    def minimalSpanningTreeR(graphEdges: List[Edge], graphNodes: List[Node], treeEdges: List[Edge]): Graph[T, U] =
+      if (graphNodes == Nil) Graph.termLabel(nodes.keys.toList, treeEdges.map(_.toTuple))
+      else {
+        val nextEdge = graphEdges.filter(edgeConnectsToGraph(_, graphNodes)).reduceLeft((r, e) => if (r.value < e.value) r else e)
+        minimalSpanningTreeR(graphEdges.filterNot(_ == nextEdge),
+          graphNodes.filter(edgeTarget(nextEdge, _) == None),
+          nextEdge :: treeEdges)
+      }
+
+    minimalSpanningTreeR(edges, nodes.values.toList.tail, Nil)
+  }
+
+
 
   def isTree: Boolean = spanningTrees.lengthCompare(1) == 0
 
@@ -213,7 +232,8 @@ object Graph extends GraphObjBase {
   }
 
   def main(args: Array[String]): Unit = {
-    println(Graph.fromString("[a-b, b-c, a-c]").spanningTrees)
+    println(Graph.fromStringLabel("[a-b/1, b-c/2, a-c/3]").minimalSpanningTree)
+    //println(Graph.fromString("[a-b, b-c, a-c]").spanningTrees)
     //println(Graph.fromString("[b-c, f-c, g-h, d, f-b, k-f, h-g]").toTermForm)
   }
 }
