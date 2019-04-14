@@ -7,7 +7,6 @@ package s99
 abstract class GraphBase[T, U] {
 
 
-
   case class Edge(n1: Node, n2: Node, value: U) {
     def toTuple = (n1.value, n2.value, value)
 
@@ -38,12 +37,46 @@ abstract class GraphBase[T, U] {
     var adj: List[Edge] = Nil
 
     def neigthbors: List[Node] = adj.map(edgeTarget(_, this).get)
+
+    override def equals(o: Any): Boolean = o match {
+      case o: Node => {
+        o.value == value
+      }
+      case _ => false
+    }
+
+    def degree: Int = edges.foldLeft(0)((acc, e) => if (edgeTarget(e, Node(value)).getOrElse(false) == false) acc else acc + 1)
   }
 
   var nodes: Map[T, Node] = Map()
   var edges: List[Edge] = Nil
 
   def edgeTarget(e: Edge, n: Node): Option[Node]
+
+  def nodesByDegree: List[Node] = {
+    nodes.foldLeft(Set[Node]())((acc, n) => acc + n._2).map(n => (n, n.degree)).toList.sortBy(r => r._2).reverse.map(n => n._1)
+  }
+
+  def colorNodes: List[(Node, Int)] = {
+    def addColor(uncolored: List[Node], colored: List[(Node, Int)], adjacentNodes: Set[Node], color: Int): List[(Node, Int)] = uncolored match {
+      case h :: t => {
+        val newAdjacent = adjacentNodes ++ h.neigthbors
+        addColor(t.filterNot(newAdjacent.apply), (h, color) :: colored, newAdjacent, color)
+      }
+      case _ => colored
+    }
+
+    def go(uncolored: List[Node], colored: List[(Node, Int)], color: Int): List[(Node, Int)] = {
+      if (uncolored == Nil) {
+        colored
+      } else {
+        val newColored = addColor(uncolored, colored, Set(), color)
+        go(uncolored.diff(newColored.map(r=>r._1)), newColored, color + 1)
+      }
+    }
+
+    go(this.nodesByDegree, Nil, 1)
+  }
 
   override def equals(o: Any) = o match {
     case g: GraphBase[_, _] => (nodes.keys.toList.diff(g.nodes.keys.toList) == Nil &&
@@ -70,7 +103,6 @@ abstract class GraphBase[T, U] {
     val n = nodes(source)
     n.adj.map(edgeTarget(_, n).get.value).flatMap(findPaths(_, source)).map(source :: _).filter(_.lengthCompare(3) > 0)
   }
-
 
 
 }
@@ -113,7 +145,6 @@ class Graph[T, U] extends GraphBase[T, U] {
 
     minimalSpanningTreeR(edges, nodes.values.toList.tail, Nil)
   }
-
 
 
   def isTree: Boolean = spanningTrees.lengthCompare(1) == 0
@@ -232,7 +263,9 @@ object Graph extends GraphObjBase {
   }
 
   def main(args: Array[String]): Unit = {
-    println(Graph.fromStringLabel("[a-b/1, b-c/2, a-c/3]").minimalSpanningTree)
+    println(Graph.fromString("[a-b, b-c, a-c, a-d]").colorNodes)
+    //println(Graph.fromString("[a-b, b-c, b-e, a-e, a-c, a-d]").nodesByDegree)
+    //println(Graph.fromStringLabel("[a-b/1, b-c/2, a-c/3]").minimalSpanningTree)
     //println(Graph.fromString("[a-b, b-c, a-c]").spanningTrees)
     //println(Graph.fromString("[b-c, f-c, g-h, d, f-b, k-f, h-g]").toTermForm)
   }
