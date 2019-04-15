@@ -25,6 +25,8 @@ abstract class GraphBase[T, U] {
     "[" + (unlinkedNodes.map(_.value.toString) ::: edgeStrs).mkString(", ") + "]"
   }
 
+
+
   def toTermForm: (List[T], List[(T, T, U)]) =
     (nodes.keys.toList, edges.map((e) => (e.n1.value, e.n2.value, e.value)))
 
@@ -46,6 +48,21 @@ abstract class GraphBase[T, U] {
     }
 
     def degree: Int = edges.foldLeft(0)((acc, e) => if (edgeTarget(e, Node(value)).getOrElse(false) == false) acc else acc + 1)
+
+    def nodesByDepth(seen: Set[Node]): List[Node] = {
+      def go(neighbors: List[Node], s: Set[Node]): List[Node] = neighbors match {
+        case Nil => Nil
+        case h :: t if s(h) => go(t, s)
+        case h :: t => {
+          val subNodes = h.nodesByDepth(s)
+          subNodes ::: go(t, s ++ subNodes)
+        }
+      }
+
+      go(neigthbors, seen + this) ::: List(this)
+    }
+    def partners: List[Node] =
+      edges.map(edgeTarget(_, this)).filterNot(_.isEmpty).map(_.get).distinct
   }
 
   var nodes: Map[T, Node] = Map()
@@ -71,7 +88,7 @@ abstract class GraphBase[T, U] {
         colored
       } else {
         val newColored = addColor(uncolored, colored, Set(), color)
-        go(uncolored.diff(newColored.map(r=>r._1)), newColored, color + 1)
+        go(uncolored.diff(newColored.map(r => r._1)), newColored, color + 1)
       }
     }
 
@@ -144,6 +161,33 @@ class Graph[T, U] extends GraphBase[T, U] {
       }
 
     minimalSpanningTreeR(edges, nodes.values.toList.tail, Nil)
+  }
+
+  def splitGraph: List[GraphBase[T,U]] = {
+    def nodes2Graph(nodes: List[Node]): GraphBase[T,U] = {
+      val adjacentForm = nodes.map(n => (n.value, n.adj.map(e =>
+        (edgeTarget(e, n).get.value, e.value))))
+      this match {
+        case _: Graph[_,_] => Graph.adjacentLabel(adjacentForm)
+        case _: Digraph[_,_] => Digraph.adjacentLabel(adjacentForm)
+      }
+    }
+    def findConnectedNodes(candidates: List[Node], soFar: List[Node]): List[Node] =
+      candidates match {
+        case Nil => soFar
+        case n :: tail => {
+          val newNodes = n.partners.diff(n::soFar)
+          findConnectedNodes(tail.union(newNodes), n :: soFar)
+        }
+      }
+    def splitGraphR(unsplit: List[Node]): List[GraphBase[T,U]] = unsplit match {
+      case Nil => Nil
+      case n :: _ => {
+        val connectedNodes = findConnectedNodes(List(n), Nil)
+        nodes2Graph(connectedNodes) :: splitGraphR(unsplit.diff(connectedNodes))
+      }
+    }
+    splitGraphR(nodes.values.toList)
   }
 
 
@@ -263,7 +307,8 @@ object Graph extends GraphObjBase {
   }
 
   def main(args: Array[String]): Unit = {
-    println(Graph.fromString("[a-b, b-c, a-c, a-d]").colorNodes)
+    println(Graph.fromString("[a-b, c]").splitGraph)
+    //println(Graph.fromString("[a-b, b-c, a-c, a-d]").colorNodes)
     //println(Graph.fromString("[a-b, b-c, b-e, a-e, a-c, a-d]").nodesByDegree)
     //println(Graph.fromStringLabel("[a-b/1, b-c/2, a-c/3]").minimalSpanningTree)
     //println(Graph.fromString("[a-b, b-c, a-c]").spanningTrees)
