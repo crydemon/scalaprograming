@@ -26,7 +26,6 @@ abstract class GraphBase[T, U] {
   }
 
 
-
   def toTermForm: (List[T], List[(T, T, U)]) =
     (nodes.keys.toList, edges.map((e) => (e.n1.value, e.n2.value, e.value)))
 
@@ -61,6 +60,7 @@ abstract class GraphBase[T, U] {
 
       go(neigthbors, seen + this) ::: List(this)
     }
+
     def partners: List[Node] =
       edges.map(edgeTarget(_, this)).filterNot(_.isEmpty).map(_.get).distinct
   }
@@ -121,6 +121,55 @@ abstract class GraphBase[T, U] {
     n.adj.map(edgeTarget(_, n).get.value).flatMap(findPaths(_, source)).map(source :: _).filter(_.lengthCompare(3) > 0)
   }
 
+  //将二分图的结点划分归入两个子集A和B，则每一条图上的边都将连接一个A中的结点与一个B中的结点。
+  //换言之，每一个结点与其相邻点之间都应该是来自不同子集，因为它们由一条边连结。
+  def isBipartiteInternal: Boolean = {
+    def isBipartiteR(evenToCheck: List[Node], oddToCheck: List[Node], evenSeen: Set[Node], oddSeen: Set[Node]): Boolean =
+      (evenToCheck, oddToCheck) match {
+        case (Nil, Nil) => true
+        case (e :: eTail, odd) =>
+          e.partners.forall(!evenSeen(_)) && isBipartiteR(eTail, odd.union(e.partners.filterNot(oddSeen(_))), evenSeen + e, oddSeen ++ e.partners)
+        case (Nil, o :: oTail) =>
+          o.partners.forall(!oddSeen(_)) && isBipartiteR(o.partners.filterNot(oddSeen(_)), oTail, evenSeen ++ o.partners, oddSeen + o)
+      }
+
+    isBipartiteR(nodes.values.toList, Nil, Set(), Set())
+  }
+
+  def isBipartite: Boolean = {
+    nodes.isEmpty || splitGraph.forall(_.isBipartiteInternal)
+  }
+
+  def splitGraph: List[GraphBase[T, U]] = {
+    def nodes2Graph(nodes: List[Node]): GraphBase[T, U] = {
+      val adjacentForm = nodes.map(n => (n.value, n.adj.map(e =>
+        (edgeTarget(e, n).get.value, e.value))))
+      this match {
+        case _: Graph[_, _] => Graph.adjacentLabel(adjacentForm)
+        case _: Digraph[_, _] => Digraph.adjacentLabel(adjacentForm)
+      }
+    }
+
+    def findConnectedNodes(candidates: List[Node], soFar: List[Node]): List[Node] =
+      candidates match {
+        case Nil => soFar
+        case n :: tail => {
+          val newNodes = n.partners.diff(n :: soFar)
+          findConnectedNodes(tail.union(newNodes), n :: soFar)
+        }
+      }
+
+    def splitGraphR(unsplit: List[Node]): List[GraphBase[T, U]] = unsplit match {
+      case Nil => Nil
+      case n :: _ => {
+        val connectedNodes = findConnectedNodes(List(n), Nil)
+        nodes2Graph(connectedNodes) :: splitGraphR(unsplit.diff(connectedNodes))
+      }
+    }
+
+    splitGraphR(nodes.values.toList)
+  }
+
 
 }
 
@@ -161,33 +210,6 @@ class Graph[T, U] extends GraphBase[T, U] {
       }
 
     minimalSpanningTreeR(edges, nodes.values.toList.tail, Nil)
-  }
-
-  def splitGraph: List[GraphBase[T,U]] = {
-    def nodes2Graph(nodes: List[Node]): GraphBase[T,U] = {
-      val adjacentForm = nodes.map(n => (n.value, n.adj.map(e =>
-        (edgeTarget(e, n).get.value, e.value))))
-      this match {
-        case _: Graph[_,_] => Graph.adjacentLabel(adjacentForm)
-        case _: Digraph[_,_] => Digraph.adjacentLabel(adjacentForm)
-      }
-    }
-    def findConnectedNodes(candidates: List[Node], soFar: List[Node]): List[Node] =
-      candidates match {
-        case Nil => soFar
-        case n :: tail => {
-          val newNodes = n.partners.diff(n::soFar)
-          findConnectedNodes(tail.union(newNodes), n :: soFar)
-        }
-      }
-    def splitGraphR(unsplit: List[Node]): List[GraphBase[T,U]] = unsplit match {
-      case Nil => Nil
-      case n :: _ => {
-        val connectedNodes = findConnectedNodes(List(n), Nil)
-        nodes2Graph(connectedNodes) :: splitGraphR(unsplit.diff(connectedNodes))
-      }
-    }
-    splitGraphR(nodes.values.toList)
   }
 
 
@@ -305,6 +327,7 @@ object Graph extends GraphObjBase {
     }
     g
   }
+
 
   def main(args: Array[String]): Unit = {
     println(Graph.fromString("[a-b, c]").splitGraph)
