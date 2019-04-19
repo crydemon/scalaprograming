@@ -215,7 +215,7 @@ object Par {
     * Our non-blocking representation does not currently handle errors at all. How can you change the representation
     * to do so?
     *
-    * See scala.concurrent.Future or scalaz Task ...
+    * See scala.akka_study.Future or scalaz Task ...
     *
     * The Future basically needs to wrap over a Try or an Either. Then, wrap the run of the Future in a try catch,
     * and if an exception is thrown propagate the Left or Failure result instead.
