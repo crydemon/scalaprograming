@@ -64,9 +64,47 @@ object LeetCode {
     else go(1, 0, 1, s)
   }
 
+  def findMedianSortedArrays1(nums1: Array[Int], nums2: Array[Int]): Double = {
+    def go(i1: Int, i2: Int, result: List[Int]): List[Int] = {
+      if (i1 >= nums1.length) nums2.drop(i2).toList.reverse ::: result
+      else if (i2 >= nums2.length) nums1.drop(i1).toList.reverse ::: result
+      else if (nums1(i1) < nums2(i2)) go(i1 + 1, i2, nums1(i1) :: result)
+      else go(i1, i2 + 1, nums2(i2) :: result)
+    }
+
+    val result = go(0, 0, List())
+    val len = result.length
+    if (len % 2 == 1) result(len / 2)
+    else (result(len / 2) + result((len - 1) / 2)) * 1.0 / 2
+  }
+
+  //问题可以归结为在两个已排好序的数组中找第k大的数
+  def findMedianSortedArrays(nums1: Array[Int], nums2: Array[Int]): Double = {
+    def findKthNumber(l1: List[Int], l2: List[Int], k: Int): Int = {
+      if (l1.length > l2.length) findKthNumber(l2, l1, k)
+      else if (l1 == Nil) l2(k - 1)
+      else if (k == 1) math.min(l1(0), l2(0))
+      else {
+        val a = math.min(k / 2, l1.length)
+        val b = k - a
+        //已找到b个最小
+        if (l1(a - 1) > l2(b - 1)) findKthNumber(l2.drop(b), l1, k - b)
+        //已找到a个最小
+        else if (l1(a - 1) < l2(b - 1)) findKthNumber(l1.drop(a), l2, k - a)
+        else l1(a - 1)
+      }
+    }
+    val len = nums1.length + nums2.length
+    val l1 = nums1.toList
+    val l2 = nums2.toList
+    if (len % 2 == 1) findKthNumber(l1, l2, (len + 1) / 2)
+    else (findKthNumber(l1, l2, len / 2) + findKthNumber(l1, l2, len / 2 + 1)) * 1.0 / 2
+  }
+
   def main(args: Array[String]): Unit = {
-    println(lengthOfLongestSubstring("abcabcbb"))
-    println(lengthOfLongestSubstring("bbtablud"))
+    println(findMedianSortedArrays(Array(1, 2), Array(3, 4)))
+    //    println(lengthOfLongestSubstring("abcabcbb"))
+    //    println(lengthOfLongestSubstring("bbtablud"))
     //    val l1 = new ListNode(2)
     //    l1.next = new ListNode(4)
     //    l1.next.next = new ListNode(3)
