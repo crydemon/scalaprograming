@@ -94,6 +94,7 @@ object LeetCode {
         else l1(a - 1)
       }
     }
+
     val len = nums1.length + nums2.length
     val l1 = nums1.toList
     val l2 = nums2.toList
@@ -101,8 +102,45 @@ object LeetCode {
     else (findKthNumber(l1, l2, len / 2) + findKthNumber(l1, l2, len / 2 + 1)) * 1.0 / 2
   }
 
+  def longestPalindrome(s: String): String = {
+    def isPalindrome(l1: Int, r1: Int, l2: Int, r2: Int): (Int, Int) = {
+      var l = l1
+      var r = r1
+      while (l > 0 && r < s.length - 1 && s.charAt(l - 1) == s.charAt(r + 1)) {
+        l = l - 1
+        r = r + 1
+      }
+      if (r2 - l2 < r - l) (l, r)
+      else (l2, r2)
+    }
+
+    var result = (0, 0)
+    for (i <- 0 to s.length - 2) {
+      var l = i
+      var r = i
+      // i为回文中心， x为i左边， y为i右边 的连续重复字符数
+      //如果 x + y = odd
+      //  1. 如果x = y 显然 longest = x + x  + isPalindrome(i-x, i +x) + 1
+      //  2. 如果x < y 显然 以此位置为中心的回文不大于 x + x + 1,因为i-x-1 位置不等于i+x+1
+      //如果 x + y = even
+      //  1. 如果x = y 显然 longest = x + x  + isPalindrome(i-x, i +x)
+      //  2. 如果x < y 显然 以此位置为中心的回文不大于 x + x
+      //所以 当遇到连续重复字符时只需要求
+      while (l > 0 && s.charAt(l - 1) == s.charAt(i)) {
+        l = l - 1
+      }
+      while (r < s.length - 1 && s.charAt(r + 1) == s.charAt(i)) {
+        r = r + 1
+      }
+      result = isPalindrome(l, r, result._1, result._2)
+    }
+    if (s.isEmpty) s
+    else s.substring(result._1, result._2 + 1)
+  }
+
   def main(args: Array[String]): Unit = {
-    println(findMedianSortedArrays(Array(1, 2), Array(3, 4)))
+    println(longestPalindrome("aaaa"))
+    //    println(findMedianSortedArrays(Array(1, 2), Array(3, 4)))
     //    println(lengthOfLongestSubstring("abcabcbb"))
     //    println(lengthOfLongestSubstring("bbtablud"))
     //    val l1 = new ListNode(2)
