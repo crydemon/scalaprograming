@@ -138,8 +138,48 @@ object LeetCode {
     else s.substring(result._1, result._2 + 1)
   }
 
+  //0 1 2 3(+1) 2 1 0(-1)
+  def convert(s: String, numRows: Int): String = {
+    if (numRows == 1 || numRows >= s.length) s
+    else {
+      val result = new Array[String](numRows).map(_ => "")
+      var index = 0
+      var step = 1
+      for (c <- s) {
+        result(index) += c
+        if (index == numRows - 1) {
+          step = -1
+        }
+        else if (index == 0) {
+          step = 1
+        }
+        index = index + step
+      }
+      result.foldLeft("")(_ + _)
+    }
+
+  }
+
+  def reverse(x: Int): Int = {
+    val s = Math.abs(x).toString
+    try {
+      val reverse = s.reverse.toInt
+      if (x > 0) reverse
+      else -1 * reverse
+    }
+    catch {
+      case _: Exception => 0
+    }
+  }
+
   def main(args: Array[String]): Unit = {
-    println(longestPalindrome("aaaa"))
+    println(Int.MaxValue)
+    //9646324351
+    //2147483647
+    //2147483647
+    println(reverse(2147483647))
+    //println(convert("PAYPALISHIRING", 4))
+    //println(longestPalindrome("aaaa"))
     //    println(findMedianSortedArrays(Array(1, 2), Array(3, 4)))
     //    println(lengthOfLongestSubstring("abcabcbb"))
     //    println(lengthOfLongestSubstring("bbtablud"))
