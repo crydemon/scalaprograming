@@ -172,12 +172,37 @@ object LeetCode {
     }
   }
 
+  def myAtoi(str: String): Int = {
+    try {
+      val t = str.trim
+      val s = if (t.charAt(0) == '+' || t.charAt(0) == '-') t.substring(1) else t
+      val flag = if (t.charAt(0) == '-') -1 else 1
+      val result = s.takeWhile(c => c >= '0' && c <= '9').foldLeft(0l)((acc, ch) => {
+        val cur = acc * 10 + (ch - '0') * flag
+        if (cur <= Int.MinValue) Int.MinValue
+        else if (cur >= Int.MaxValue) Int.MaxValue
+        else cur
+      })
+      result.toInt
+    }
+    catch {
+      case _: Exception => 0
+    }
+  }
+
+  def isPalindrome(x: Int): Boolean = {
+    val s = x.toString
+    s.reverse == s
+  }
+
+  //scala为什么运行那么慢
   def main(args: Array[String]): Unit = {
-    println(Int.MaxValue)
+    println(isPalindrome(131))
+    //println(myAtoi("4193 with words"))
     //9646324351
     //2147483647
     //2147483647
-    println(reverse(2147483647))
+    //println(reverse(2147483647))
     //println(convert("PAYPALISHIRING", 4))
     //println(longestPalindrome("aaaa"))
     //    println(findMedianSortedArrays(Array(1, 2), Array(3, 4)))
