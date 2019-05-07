@@ -190,6 +190,17 @@ object LeetCode {
     }
   }
 
+  def isMatch(s: String, p: String): Boolean = {
+    if (p.isEmpty) s.isEmpty
+    else if (s.length > 0 && (s.head == p.head || p.head == '.')) {
+      if (p.length > 1 && p.tail.head == '*') isMatch(s.tail, p) || isMatch(s, p.tail.tail)
+      else isMatch(s.tail, p.tail)
+    }
+    else if (p.length > 1 && p.tail.head == '*') isMatch(s, p.tail.tail)
+    else false
+  }
+
+
   def isPalindrome(x: Int): Boolean = {
     val s = x.toString
     s.reverse == s
@@ -197,7 +208,8 @@ object LeetCode {
 
   //scala为什么运行那么慢
   def main(args: Array[String]): Unit = {
-    println(isPalindrome(131))
+    println(isMatch("aa", ".*c"))
+    //    println(isPalindrome(131))
     //println(myAtoi("4193 with words"))
     //9646324351
     //2147483647
