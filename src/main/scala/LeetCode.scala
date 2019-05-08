@@ -206,9 +206,23 @@ object LeetCode {
     s.reverse == s
   }
 
+  def maxArea(height: Array[Int]): Int = {
+    //可以算出当前短板的最大容量
+    // 因为起始时，长最大，所以只需找出i,j中的最小值，便可算得当前短板的最大容量
+    //然后抛弃这个短板，在剩下的（i-1, j）或（i, j-1）中找到此刻短板的最大容量，跟（i,j）短板的最大容量比较
+    //重复上述步骤，便可获得最大容量
+    def go(i: Int, j: Int, result: Int): Int = {
+      if (i >= j ) result
+      else if (height(i) > height(j)) go(i, j - 1, math.max(result, (j - i) * height(j)))
+      else go(i + 1, j, math.max(result, (j - i) * height(i)))
+    }
+    go(0, height.length - 1, 0)
+  }
+
   //scala为什么运行那么慢
   def main(args: Array[String]): Unit = {
-    println(isMatch("aa", ".*c"))
+    println(maxArea(Array(1, 3, 2, 5, 25, 24, 5)))
+    //    println(isMatch("aa", ".*c"))
     //    println(isPalindrome(131))
     //println(myAtoi("4193 with words"))
     //9646324351
