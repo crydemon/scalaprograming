@@ -212,16 +212,47 @@ object LeetCode {
     //然后抛弃这个短板，在剩下的（i-1, j）或（i, j-1）中找到此刻短板的最大容量，跟（i,j）短板的最大容量比较
     //重复上述步骤，便可获得最大容量
     def go(i: Int, j: Int, result: Int): Int = {
-      if (i >= j ) result
+      if (i >= j) result
       else if (height(i) > height(j)) go(i, j - 1, math.max(result, (j - i) * height(j)))
       else go(i + 1, j, math.max(result, (j - i) * height(i)))
     }
+
     go(0, height.length - 1, 0)
+  }
+
+  //除特殊表示之外，其余的都是重复当前的数字表示+1
+  def intToRoman(num: Int): String = {
+    val nums = Array(1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1)
+    val Roman = Array("M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I")
+
+    def go(a: Int, i: Int, result: List[String]): List[String] = {
+      if (a == 0) result
+      else go(a % nums(i), i + 1, result ++ List.fill(a / nums(i))(Roman(i)))
+    }
+
+    go(num, 0, Nil).foldLeft("")(_ + _)
+  }
+
+  def romanToInt(s: String): Int = {
+    val map = Map('I' -> 1, 'V' -> 5, 'X' -> 10, 'L' -> 50, 'C' -> 100, 'D' -> 500, 'M' -> 1000)
+
+    def go(i: Int, result: Int): Int = {
+      if (i >= s.length) result
+      else if (i + 1 < s.length && map.getOrElse(s(i), 0) < map.getOrElse(s(i + 1), 0)) {
+        go(i + 1, result - map.getOrElse(s(i), 0))
+      } else {
+        go(i + 1, result + map.getOrElse(s(i), 0))
+      }
+    }
+
+    go(0, 0)
   }
 
   //scala为什么运行那么慢
   def main(args: Array[String]): Unit = {
-    println(maxArea(Array(1, 3, 2, 5, 25, 24, 5)))
+    println(romanToInt("MCMXCIV"))
+    println(intToRoman(58))
+    //println(maxArea(Array(1, 3, 2, 5, 25, 24, 5)))
     //    println(isMatch("aa", ".*c"))
     //    println(isPalindrome(131))
     //println(myAtoi("4193 with words"))
