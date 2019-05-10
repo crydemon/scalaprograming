@@ -248,10 +248,16 @@ object LeetCode {
     go(0, 0)
   }
 
+  def longestCommonPrefix(strs: Array[String]): String = {
+    if (strs.isEmpty) ""
+    else strs.head.zipWithIndex.takeWhile(r => strs.forall(s => r._2 < s.length &&  s(r._2) == r._1)).map(_._1).mkString
+  }
+
   //scala为什么运行那么慢
   def main(args: Array[String]): Unit = {
-    println(romanToInt("MCMXCIV"))
-    println(intToRoman(58))
+    println(longestCommonPrefix(Array("flower", "flow", "flight")))
+    //    println(romanToInt("MCMXCIV"))
+    //    println(intToRoman(58))
     //println(maxArea(Array(1, 3, 2, 5, 25, 24, 5)))
     //    println(isMatch("aa", ".*c"))
     //    println(isPalindrome(131))
