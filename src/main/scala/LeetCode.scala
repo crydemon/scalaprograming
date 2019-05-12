@@ -250,14 +250,38 @@ object LeetCode {
 
   def longestCommonPrefix(strs: Array[String]): String = {
     if (strs.isEmpty) ""
-    else strs.head.zipWithIndex.takeWhile(r => strs.forall(s => r._2 < s.length &&  s(r._2) == r._1)).map(_._1).mkString
+    else strs.head.zipWithIndex.takeWhile(r => strs.forall(s => r._2 < s.length && s(r._2) == r._1)).map(_._1).mkString
+  }
+
+  def threeSum(nums: Array[Int]): List[List[Int]] = {
+    val sorted = nums.sorted
+    var result = List[List[Int]]()
+    for (x <- 0 until sorted.length
+         if sorted(x) <= 0
+         if x == 0 || sorted(x) != sorted(x - 1)
+    ) {
+      var (l, r) = (x + 1, sorted.length - 1)
+      while (l < r) {
+        sorted(l) + sorted(x) + sorted(r) match {
+          case sum if sum > 0 => r -= 1
+          case sum if sum < 0 => l += 1
+          case 0 => {
+            result = result :+ List(sorted(l), sorted(x), sorted(r))
+            do l += 1 while (l < r && sorted(l) == sorted(l - 1))
+            do r -= 1 while (l < r && sorted(r) == sorted(r + 1))
+          }
+        }
+      }
+    }
+    result
   }
 
   //scala为什么运行那么慢
   def main(args: Array[String]): Unit = {
-    println(longestCommonPrefix(Array("flower", "flow", "flight")))
+    println(threeSum(Array(-2, 0, 0, 2, 2)))
+    //println(longestCommonPrefix(Array("flower", "flow", "flight")))
     //    println(romanToInt("MCMXCIV"))
-    //    println(intToRoman(58))
+    //    println(intToRoman(58))c
     //println(maxArea(Array(1, 3, 2, 5, 25, 24, 5)))
     //    println(isMatch("aa", ".*c"))
     //    println(isPalindrome(131))
