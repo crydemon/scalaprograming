@@ -276,9 +276,38 @@ object LeetCode {
     result
   }
 
+
+  def threeSumClosest(nums: Array[Int], target: Int): Int = {
+    val sorted = nums.sorted
+    var result = nums.take(3).sum
+    for (x <- 0 until sorted.length
+         if result != target
+    ) {
+      var (l, r) = (x + 1, sorted.length - 1)
+      while (l < r) {
+        val sum = sorted(l) + sorted(x) + sorted(r)
+        if (math.abs(sum - target) < math.abs(result - target)) result = sum
+        if (sum < target) l += 1
+        else r -= 1
+      }
+    }
+    result
+  }
+
+  def grayCode(n: Int): List[Int] = {
+    def go(len: Int, i: Int, result: List[Int]): List[Int] = {
+      if (i == len) result
+      else go(len, i + 1, (i ^ (i >> 1)) :: result)
+    }
+
+    go(math.pow(2, n).toInt, 0, Nil).reverse
+  }
+
   //scala为什么运行那么慢
   def main(args: Array[String]): Unit = {
-    println(threeSum(Array(-2, 0, 0, 2, 2)))
+    println(grayCode(2))
+    //println(threeSumClosest(Array(0, 2, 1, -3), 1))
+    //println(threeSum(Array(-2, 0, 0, 2, 2)))
     //println(longestCommonPrefix(Array("flower", "flow", "flight")))
     //    println(romanToInt("MCMXCIV"))
     //    println(intToRoman(58))c
