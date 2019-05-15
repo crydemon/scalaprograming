@@ -303,9 +303,41 @@ object LeetCode {
     go(math.pow(2, n).toInt, 0, Nil).reverse
   }
 
+
+  class TreeNode(var _value: Int) {
+    var value: Int = _value
+    var left: TreeNode = null
+    var right: TreeNode = null
+  }
+
+  def pathSum(root: TreeNode, sum: Int): List[List[Int]] = {
+
+    def go(node: TreeNode, n: Int, one: List[Int]): List[List[Int]] = {
+      if (n == 0 && node == null) List(one.reverse)
+      else if (node == null || node._value == one) Nil
+      else if (node.left == null) go(node.right, n - node._value, node._value :: one)
+      else if (node.right == null) go(node.left, n - node._value, node._value :: one)
+      else go(node.left, n - node._value, node._value :: one) ::: go(node.right, n - node._value, node._value :: one)
+    }
+    if(root == null ) Nil
+    else go(root, sum, Nil)
+  }
+
   //scala为什么运行那么慢
   def main(args: Array[String]): Unit = {
-    println(grayCode(2))
+    val root = new TreeNode(5)
+    root.left = new TreeNode(4)
+    root.left.left = new TreeNode(11)
+    root.left.left.left = new TreeNode(7)
+    root.left.left.right = new TreeNode(2)
+
+    root.right = new TreeNode(8)
+    root.right.left = new TreeNode(13)
+    root.right.right = new TreeNode(4)
+    root.right.right.left = new TreeNode(5)
+    root.right.right.right = new TreeNode(1)
+    println(pathSum(root, 22))
+    //println(grayCode(2))
     //println(threeSumClosest(Array(0, 2, 1, -3), 1))
     //println(threeSum(Array(-2, 0, 0, 2, 2)))
     //println(longestCommonPrefix(Array("flower", "flow", "flight")))
