@@ -308,6 +308,10 @@ object LeetCode {
     var value: Int = _value
     var left: TreeNode = null
     var right: TreeNode = null
+
+    override def toString: String = {
+      value + "," + left.toString + "," + right.toString
+    }
   }
 
   def pathSum(root: TreeNode, sum: Int): List[List[Int]] = {
@@ -319,24 +323,54 @@ object LeetCode {
       else if (node.right == null) go(node.left, n - node._value, node._value :: one)
       else go(node.left, n - node._value, node._value :: one) ::: go(node.right, n - node._value, node._value :: one)
     }
-    if(root == null ) Nil
+
+    if (root == null) Nil
     else go(root, sum, Nil)
+  }
+
+  def recoverTree(root: TreeNode): Unit = {
+    var pre: TreeNode = null
+    var first: TreeNode = null
+    var second: TreeNode = null
+
+    def go(node: TreeNode): Unit = {
+      if (node == null) Unit
+      else {
+        go(node.left)
+        if (pre != null && pre.value > node.value) {
+          if (first == null) first = pre
+          if (first != null) second = node
+        }
+        pre = node
+        go(node.right)
+      }
+    }
+
+    go(root)
+    val tmp = first.value
+    first.value = second.value
+    second.value = tmp
   }
 
   //scala为什么运行那么慢
   def main(args: Array[String]): Unit = {
-    val root = new TreeNode(5)
-    root.left = new TreeNode(4)
-    root.left.left = new TreeNode(11)
-    root.left.left.left = new TreeNode(7)
-    root.left.left.right = new TreeNode(2)
-
-    root.right = new TreeNode(8)
-    root.right.left = new TreeNode(13)
-    root.right.right = new TreeNode(4)
-    root.right.right.left = new TreeNode(5)
-    root.right.right.right = new TreeNode(1)
-    println(pathSum(root, 22))
+    val root = new TreeNode(3)
+    root.left = new TreeNode(1)
+    root.right = new TreeNode(4)
+    root.right.left = new TreeNode(2)
+    recoverTree(root)
+    //    val root = new TreeNode(5)
+    //    root.left = new TreeNode(4)
+    //    root.left.left = new TreeNode(11)
+    //    root.left.left.left = new TreeNode(7)
+    //    root.left.left.right = new TreeNode(2)
+    //
+    //    root.right = new TreeNode(8)
+    //    root.right.left = new TreeNode(13)
+    //    root.right.right = new TreeNode(4)
+    //    root.right.right.left = new TreeNode(5)
+    //    root.right.right.right = new TreeNode(1)
+    //    println(pathSum(root, 22))
     //println(grayCode(2))
     //println(threeSumClosest(Array(0, 2, 1, -3), 1))
     //println(threeSum(Array(-2, 0, 0, 2, 2)))
