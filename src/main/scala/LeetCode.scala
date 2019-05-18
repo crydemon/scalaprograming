@@ -1,3 +1,5 @@
+import java.util
+
 object LeetCode {
   def twoSum(nums: Array[Int], target: Int): Array[Int] = {
     def go(s: Int, e: Int, arr: Array[(Int, Int)]): Array[Int] = {
@@ -352,13 +354,34 @@ object LeetCode {
     second.value = tmp
   }
 
+  def zigzagLevelOrder(root: TreeNode): List[List[Int]] = {
+
+    def go(l2r: Boolean, queue: List[TreeNode], result: List[List[Int]]): List[List[Int]] = {
+      if (queue == Nil) result
+      else {
+        val layer = queue.foldRight(List[TreeNode]())((n, acc) => (n.left, n.right) match {
+          case (null, null) => acc
+          case (l, null) => l :: acc
+          case (null, r) => r :: acc
+          case (l, r) => l :: r :: acc
+        })
+        if (l2r) go(false, layer, queue.map(_.value) :: result)
+        else go(true, layer, queue.map(_.value).reverse :: result)
+      }
+    }
+
+    if(root == null) Nil
+    else go(true, List(root), Nil).reverse
+  }
+
   //scala为什么运行那么慢
   def main(args: Array[String]): Unit = {
     val root = new TreeNode(3)
     root.left = new TreeNode(1)
     root.right = new TreeNode(4)
     root.right.left = new TreeNode(2)
-    recoverTree(root)
+    println(zigzagLevelOrder(root))
+    //recoverTree(root)
     //    val root = new TreeNode(5)
     //    root.left = new TreeNode(4)
     //    root.left.left = new TreeNode(11)
