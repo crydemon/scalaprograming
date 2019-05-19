@@ -25,12 +25,17 @@ public class Leetcode {
     }
 
     private int dfs(TreeNode node, int result) {
-        if (node == null) return result;
-        else if (node.left != null && node.right != null)
+        if (node == null) {
+            return result;
+        } else if (node.left != null && node.right != null) {
             return dfs(node.left, result * 10 + node.val) + dfs(node.right, result * 10 + node.val);
-        else if (node.left != null) return dfs(node.left, result * 10 + node.val);
-        else if (node.right != null) return dfs(node.right, result * 10 + node.val);
-        else return result * 10 + node.val;
+        } else if (node.left != null) {
+            return dfs(node.left, result * 10 + node.val);
+        } else if (node.right != null) {
+            return dfs(node.right, result * 10 + node.val);
+        } else {
+            return result * 10 + node.val;
+        }
     }
 
     public int sumNumbers(TreeNode root) {
