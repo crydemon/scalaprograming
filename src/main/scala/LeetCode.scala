@@ -374,9 +374,9 @@ object LeetCode {
     else go(true, List(root), Nil).reverse
   }
 
-  def sumNumbers(root: TreeNode): Int = {
-
-  }
+//  def sumNumbers(root: TreeNode): Int = {
+//
+//  }
 
   //scala为什么运行那么慢
   def main(args: Array[String]): Unit = {

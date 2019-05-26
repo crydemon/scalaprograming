@@ -1,6 +1,8 @@
 import org.scalatest.Fact;
+import scala.Int;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -42,8 +44,56 @@ public class Leetcode {
         return dfs(root, 0);
     }
 
-    public static void main(String[] args) {
+    public int singleNumber(int[] nums) {
+        HashMap<Integer, Integer> map = new HashMap<>();
+        int result = 0;
+        for (int num : nums) {
+            int x = map.getOrDefault(num, 0);
+            if (x == 1) {
+                result -= num;
+            } else if (x == 0) {
+                result += num;
+            }
+            map.put(num, x + 1);
+        }
+        return result;
+    }
 
+    public void reorderList(ListNode head) {
+        // Find the middle node
+        ListNode slow = head, fast = head.next;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        // Reverse the second half
+        ListNode head2 = reverse(slow);
+
+        while (head != null && head2 != null) {
+            ListNode tmp1 = head.next;
+            ListNode tmp2 = head2.next;
+            head2.next = head.next;
+            head.next = head2;
+            head = tmp1;
+            head2 = tmp2;
+        }
+    }
+
+    private ListNode reverse(ListNode n) {
+        ListNode prev = null;
+        ListNode cur = n;
+        while (cur != null) {
+            ListNode tmp = cur.next;
+            cur.next = prev;
+            prev = cur;
+            cur = tmp;
+        }
+        return prev;
+    }
+
+    public static void main(String[] args) {
+        int ans = new Leetcode().singleNumber(new int[]{0, 1, 0, 1, 0, 1, 99});
+        System.out.println(ans);
     }
 }
 
@@ -70,6 +120,15 @@ class TreeNode {
     TreeNode right;
 
     TreeNode(int x) {
+        val = x;
+    }
+}
+
+class ListNode {
+    int val;
+    ListNode next;
+
+    ListNode(int x) {
         val = x;
     }
 }
