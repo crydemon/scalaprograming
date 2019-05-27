@@ -91,6 +91,42 @@ public class Leetcode {
         return prev;
     }
 
+    public List<Integer> preorderTraversal(TreeNode root) {
+        return preorder(root, new ArrayList<>());
+    }
+
+    public List<Integer> preorder(TreeNode node, List<Integer> result) {
+        if (node == null) {
+            return result;
+        }
+        result.add(node.val);
+        if (node.left != null) {
+            preorder(node.left, result);
+        }
+        if (node.right != null) {
+            preorder(node.right, result);
+        }
+        return result;
+    }
+
+    public List<Integer> postorderTraversal(TreeNode root) {
+        return postorder(root, new ArrayList<>());
+    }
+
+    public List<Integer> postorder(TreeNode node, List<Integer> result) {
+        if (node == null) {
+            return result;
+        }
+        if (node.left != null) {
+            postorder(node.left, result);
+        }
+        if (node.right != null) {
+            postorder(node.right, result);
+        }
+        result.add(node.val);
+        return result;
+    }
+
     public static void main(String[] args) {
         int ans = new Leetcode().singleNumber(new int[]{0, 1, 0, 1, 0, 1, 99});
         System.out.println(ans);
