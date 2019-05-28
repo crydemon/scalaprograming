@@ -127,9 +127,37 @@ public class Leetcode {
         return result;
     }
 
+    public ListNode insertionSortList(ListNode head) {
+        if (head == null) return null;
+        ListNode unsorted = head;
+        ListNode result = new ListNode(Integer.MIN_VALUE);
+        ListNode pre = result;
+        ListNode next = null;
+        while (unsorted != null) {
+            next = unsorted.next;
+            while (pre.next !=null && pre.next.val < unsorted.val) {
+                pre = pre.next;
+            }
+            unsorted.next = pre.next;
+            pre.next = unsorted;
+            pre = result;
+            unsorted = next;
+        }
+        return result.next;
+    }
+
     public static void main(String[] args) {
-        int ans = new Leetcode().singleNumber(new int[]{0, 1, 0, 1, 0, 1, 99});
-        System.out.println(ans);
+        ListNode head = new ListNode(4);
+        head.next = new ListNode(2);
+        head.next.next = new ListNode(1);
+        head.next.next.next = new ListNode(3);
+        ListNode result = new Leetcode().insertionSortList(head);
+        while (result != null) {
+            System.out.println(result.val);
+            result = result.next;
+        }
+//        int ans = new Leetcode().singleNumber(new int[]{0, 1, 0, 1, 0, 1, 99});
+//        System.out.println(ans);
     }
 }
 
