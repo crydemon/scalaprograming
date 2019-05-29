@@ -4,6 +4,7 @@ import scala.Int;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Stack;
 
 
 public class Leetcode {
@@ -135,7 +136,7 @@ public class Leetcode {
         ListNode next = null;
         while (unsorted != null) {
             next = unsorted.next;
-            while (pre.next !=null && pre.next.val < unsorted.val) {
+            while (pre.next != null && pre.next.val < unsorted.val) {
                 pre = pre.next;
             }
             unsorted.next = pre.next;
@@ -146,16 +147,44 @@ public class Leetcode {
         return result.next;
     }
 
-    public static void main(String[] args) {
-        ListNode head = new ListNode(4);
-        head.next = new ListNode(2);
-        head.next.next = new ListNode(1);
-        head.next.next.next = new ListNode(3);
-        ListNode result = new Leetcode().insertionSortList(head);
-        while (result != null) {
-            System.out.println(result.val);
-            result = result.next;
+    public int evalRPN(String[] tokens) {
+        if (tokens == null) return 0;
+        Stack<Integer> stack = new Stack<>();
+        for (String s : tokens) {
+            if (s.equals("+")) {
+                int x1 = stack.pop();
+                int x2 = stack.pop();
+                stack.push(x1 + x2);
+            } else if (s.equals("-")) {
+                int x1 = stack.pop();
+                int x2 = stack.pop();
+                stack.push(x1 - x2);
+            } else if (s.equals("*")) {
+                int x1 = stack.pop();
+                int x2 = stack.pop();
+                stack.push(x1 * x2);
+            } else if (s.equals("/")) {
+                int x1 = stack.pop();
+                int x2 = stack.pop();
+                stack.push(x1 / x2);
+            } else {
+                stack.push(Integer.valueOf(s));
+            }
         }
+        return stack.pop();
+    }
+
+    public static void main(String[] args) {
+        System.out.println(new Leetcode().evalRPN(new String[]{"2", "1", "+", "3", "*"}));
+//        ListNode head = new ListNode(4);
+//        head.next = new ListNode(2);
+//        head.next.next = new ListNode(1);
+//        head.next.next.next = new ListNode(3);
+//        ListNode result = new Leetcode().insertionSortList(head);
+//        while (result != null) {
+//            System.out.println(result.val);
+//            result = result.next;
+//        }
 //        int ans = new Leetcode().singleNumber(new int[]{0, 1, 0, 1, 0, 1, 99});
 //        System.out.println(ans);
     }
