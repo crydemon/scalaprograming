@@ -1,13 +1,212 @@
+import org.junit.Test;
 import org.scalatest.Fact;
 import scala.Int;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 
 public class Leetcode {
+
+    public int lengthOfLongestSubstring(String s) {
+        int[] hash = new int[256];
+        Arrays.fill(hash, -1);
+        int result = 0;
+        int curMax = 0;
+        int start = 0;
+        for (int i = 0; i < s.length(); i++) {
+            char ch = s.charAt(i);
+            if (hash[ch] == -1) {
+                curMax++;
+            } else {
+                curMax = i - hash[ch];
+                for (int j = start; j < hash[ch]; j++) {
+                    hash[s.charAt(j)] = -1;
+                }
+                start = hash[ch] + 1;
+                hash[ch] = -1;
+            }
+            hash[ch] = i;
+            result = Math.max(curMax, result);
+        }
+        return result;
+    }
+
+    public String longestCommonPrefix(String[] strs) {
+        if (strs == null || strs.length == 0) return "";
+        String result = strs[0];
+        for (String str : strs) {
+            while (!str.startsWith(result)) {
+                result = result.substring(0, result.length() - 1);
+                if (result == null) {
+                    return "";
+                }
+            }
+        }
+        return result;
+    }
+
+    public boolean checkInclusion(String s1, String s2) {
+        if (s1.length() > s2.length()) return false;
+        //滑动窗口
+        int[] win1 = new int[26];
+        int[] win2 = new int[26];
+        for (int i = 0; i < s1.length(); i++) {
+            win1[s1.charAt(i) - 'a']++;
+            win2[s2.charAt(i) - 'a']++;
+        }
+        if (Arrays.equals(win1, win2)) {
+            return true;
+        }
+        for (int i = 0; i < s2.length() - s1.length(); i++) {
+            win2[s2.charAt(i) - 'a']--;
+            win2[s2.charAt(s1.length() + i) - 'a']++;
+            if (Arrays.equals(win1, win2)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public String multiply(String num1, String num2) {
+        //存储当前累乘的值
+        int[] acc = new int[num1.length() + num2.length()];
+        for (int i = num1.length() - 1; i >= 0; i--) {
+            int x = num1.charAt(i) - '0';
+            for (int j = num2.length() - 1; j >= 0; j--) {
+                int y = num2.charAt(j) - '0';
+                int sum = acc[i + j + 1] + x * y;
+                acc[i + j] += sum / 10;//进位
+                acc[i + j + 1] = sum % 10;//更新当前位
+            }
+        }
+        System.out.println(Arrays.toString(acc));
+        String result = "";
+        for (int i : acc) {
+            if (i == 0 && result == "") continue;
+            result += i;
+        }
+        return result;
+    }
+
+    public String reverseWords(String s) {
+        String result = "";
+        for (int i = 0; i < s.length(); ) {
+            while (i < s.length() && s.charAt(i) == ' ') {
+                i++;
+            }
+            String word = "";
+            while (i < s.length() && s.charAt(i) != ' ') {
+                word += s.charAt(i++);
+            }
+            if (word == "") break;
+            if (result.isEmpty()) {
+                result = word;
+            } else {
+                result = word + " " + result;
+            }
+        }
+        return result;
+    }
+
+    public String simplifyPath(String path) {
+        String[] strs = path.split("/");
+        System.out.println(Arrays.toString(strs));
+        Stack<String> stack = new Stack<>();
+        for (String str : strs) {
+            if (str.isEmpty()) continue;
+            if (str.equals(".")) {
+                continue;
+            } else if (str.equals("..")) {
+                if (stack.isEmpty()) return "/";
+                stack.pop();
+            } else {
+                stack.push(str);
+            }
+        }
+        String result = "";
+        while (!stack.isEmpty()) {
+            String s = stack.pop();
+            if (result.isEmpty()) {
+                result = s;
+            } else {
+                result = s + "/" + result;
+            }
+        }
+        return "/" + result;
+    }
+
+    public List<String> restoreIpAddresses(String s) {
+        List<String> result = new ArrayList<>();
+        helper1(s, 0, 0, result, "");
+        return result;
+    }
+
+    public void helper1(String s, int pos, int num, List<String> result, String cur) {
+        if (num > 4 || pos > s.length()) {
+            return;
+        } else if (pos == s.length() && num == 4) {
+            result.add(cur);
+        } else {
+            for (int i = pos + 1; i < pos + 4 && i <= s.length(); i++) {
+                String x = s.substring(pos, i);
+                Integer xInt = Integer.valueOf(x);
+                if (xInt <= 255 && x.equals(String.valueOf(xInt))) {
+                    if (cur == "") {
+                        helper1(s, i, num + 1, result, x);
+                    } else {
+                        helper1(s, i, num + 1, result, cur + "." + x);
+                    }
+                }
+            }
+        }
+    }
+
+    public List<List<Integer>> threeSum(int[] nums) {
+        List<List<Integer>> result = new ArrayList<>();
+        Arrays.sort(nums);
+        for (int i = 0; i + 2 < nums.length; i++) {
+            int target = -nums[i];
+            if (i > 0 && nums[i] == nums[i - 1]) continue;
+            int j = i + 1;
+            int k = nums.length - 1;
+            while (j < k) {
+                int sum = nums[j] + nums[k];
+                if (sum == target) {
+                    result.add(Arrays.asList(nums[i], nums[j], nums[k]));
+                    while (j< k &&nums[++j] == nums[j + 1]) ;
+                    while (j < k && nums[--k] == nums[k - 1]) ;
+                } else if (sum < target) {
+                    j++;
+                } else {
+                    k--;
+                }
+            }
+        }
+        return result;
+    }
+    public int maxAreaOfIsland(int[][] grid) {
+        int maxArea = 0;
+        for (int i = 0; i< grid.length; i++) {
+            for (int j= 0; j <grid[0].length; j++) {
+                if(grid[i][j] == 1) {
+                    maxArea = Math.max(maxArea, helper3(i, j, grid));
+                }
+            }
+        }
+        return maxArea;
+    }
+
+    public int helper3(int i, int j ,int[][] grid) {
+        if(i < 0 || i > grid.length || j < 0 || j > grid[0].length || grid[i][j] == 0) return 0;
+        grid[i][j] = 0;
+        return 1 + helper3(i-1, j, grid) + helper3(i + 1,j, grid) + helper3(i, j-1, grid) + helper3(i, j + 1, grid);
+    }
+    @Test
+    public void test1() {
+        //lengthOfLongestSubstring("abcabcbb");
+        List<List<Integer>> result = threeSum(new int[]{-1, 0, 1, 2, -1, -4});
+        System.out.println(result);
+    }
 
     public Node connect(Node root) {
         if (root == null) return null;
