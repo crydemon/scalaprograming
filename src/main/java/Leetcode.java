@@ -173,7 +173,7 @@ public class Leetcode {
                 int sum = nums[j] + nums[k];
                 if (sum == target) {
                     result.add(Arrays.asList(nums[i], nums[j], nums[k]));
-                    while (j< k &&nums[++j] == nums[j + 1]) ;
+                    while (j < k && nums[++j] == nums[j + 1]) ;
                     while (j < k && nums[--k] == nums[k - 1]) ;
                 } else if (sum < target) {
                     j++;
@@ -184,11 +184,12 @@ public class Leetcode {
         }
         return result;
     }
+
     public int maxAreaOfIsland(int[][] grid) {
         int maxArea = 0;
-        for (int i = 0; i< grid.length; i++) {
-            for (int j= 0; j <grid[0].length; j++) {
-                if(grid[i][j] == 1) {
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[0].length; j++) {
+                if (grid[i][j] == 1) {
                     maxArea = Math.max(maxArea, helper3(i, j, grid));
                 }
             }
@@ -196,15 +197,91 @@ public class Leetcode {
         return maxArea;
     }
 
-    public int helper3(int i, int j ,int[][] grid) {
-        if(i < 0 || i > grid.length || j < 0 || j > grid[0].length || grid[i][j] == 0) return 0;
+    public int helper3(int i, int j, int[][] grid) {
+        if (i < 0 || i > grid.length || j < 0 || j > grid[0].length || grid[i][j] == 0) return 0;
         grid[i][j] = 0;
-        return 1 + helper3(i-1, j, grid) + helper3(i + 1,j, grid) + helper3(i, j-1, grid) + helper3(i, j + 1, grid);
+        return 1 + helper3(i - 1, j, grid) + helper3(i + 1, j, grid) + helper3(i, j - 1, grid) + helper3(i, j + 1, grid);
     }
+
+    public int search(int[] nums, int target) {
+        int left = 0;
+        int right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            System.out.println(mid);
+            if (nums[left] <= nums[mid]) {
+                int index = Arrays.binarySearch(nums, left, mid + 1, target);
+                if (index >= 0) return index;
+                else {
+                    left = mid + 1;
+                }
+            } else {
+                System.out.println(right + 1);
+                int index = Arrays.binarySearch(nums, mid, right + 1, target);
+                if (index >= 0) return index;
+                else {
+                    right = mid - 1;
+                }
+            }
+        }
+        return -1;
+    }
+
+    public int findLengthOfLCIS(int[] nums) {
+        if (nums.length == 0) return 0;
+        int count = 1;
+        int max = 0;
+        for (int i = 1; i < nums.length; i++) {
+            if (nums[i - 1] < nums[i]) {
+                count++;
+            } else {
+                max = Math.max(max, count);
+                count = 1;
+            }
+        }
+        return Math.max(max, count);
+    }
+
+    public int findKthLargest(int[] nums, int k) {
+        return search(k, 0, nums.length - 1, nums);
+    }
+
+    public int search(int k, int left, int right, int[] nums) {
+        int x = partition(left, right, nums);
+        if (x == -1) return -1;
+        if (x == k - 1) return nums[x];
+        else if (x > k - 1) return search(k, 0, x - 1, nums);
+        else return search(k, x + 1, right, nums);
+    }
+
+    public int partition(int left, int right, int[] nums) {
+        if (left > right) return -1;
+        int x = left;
+        while (left <= right) {//因为right表示的是左边第right大，所以必须要加上等号
+            System.out.println(Arrays.toString(nums));
+            System.out.println(left + "," + right);
+            if (nums[left] >= nums[x]) left++;
+            if (nums[right] < nums[x]) right--;
+            if (left < right && nums[left] < nums[right]) {
+                swap(left, right, nums);
+            }
+        }
+        swap(x, right, nums);
+        System.out.println(right);
+        System.out.println(Arrays.toString(nums));
+        return right;
+    }
+
+    public void swap(int i, int j, int[] nums) {
+        int tmp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = tmp;
+    }
+
     @Test
     public void test1() {
         //lengthOfLongestSubstring("abcabcbb");
-        List<List<Integer>> result = threeSum(new int[]{-1, 0, 1, 2, -1, -4});
+        int result = findKthLargest(new int[]{3, 1, 2, 4}, 2);
         System.out.println(result);
     }
 

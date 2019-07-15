@@ -50,6 +50,8 @@ object LeetCode {
     result
   }
 
+
+
   def lengthOfLongestSubstring(s: String): Int = {
     def go(longest: Int, curStart: Int, curEnd: Int, s: String): Int = {
       if (curEnd == s.length) longest
