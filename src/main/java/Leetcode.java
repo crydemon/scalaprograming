@@ -317,6 +317,59 @@ public class Leetcode {
         return sb.toString();
     }
 
+    public int findCircleNum(int[][] M) {
+        int[] root = new int[M.length];
+        for (int i = 0; i < M.length; i++) {
+            root[i] = i;
+        }
+        int result = M.length;
+        for (int i = 0; i < M.length; i++) {
+            for (int j = i + 1; j < M.length; j++) {
+                if (M[i][j] == 1) {
+                    int p1 = getRoot(root, i);
+                    int p2 = getRoot(root, j);
+                    if (p1 != p2) {
+                        result--;
+                        root[p2] = p1;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    public int getRoot(int[] root, int child) {
+        while (root[child] != child) {
+            root[child] = root[root[child]];
+            child = root[child];
+        }
+        return child;
+    }
+
+    class Solution {
+        public int findCircleNum(int[][] M) {
+            int len = M.length;
+            boolean[] flag = new boolean[len]; //默认为false
+            int count = 0;
+            for (int i = 0; i < len; i++) {
+                if (!flag[i]) {
+                    dfs(i, M, flag);
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        void dfs(int i, int[][] M, boolean[] flag) {
+            flag[i] = true;
+            for (int j = 0; j < M.length; j++) {
+                if (!flag[j] && M[i][j] == 1) {
+                    dfs(j, M, flag);
+                }
+            }
+        }
+    }
+
     @Test
     public void test1() {
         //lengthOfLongestSubstring("abcabcbb");
