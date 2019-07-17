@@ -278,10 +278,49 @@ public class Leetcode {
         nums[j] = tmp;
     }
 
+    public int longestConsecutive(int[] nums) {
+        if (nums.length == 0) return 0;
+        Arrays.sort(nums);
+        int maxLen = 1;
+        int curLen = 1;
+        for (int i = 1; i < nums.length; i++) {
+            if (nums[i - 1] == nums[i]) {
+                curLen++;
+            } else {
+                maxLen = Math.max(maxLen, curLen);
+                curLen = 1;
+            }
+        }
+        maxLen = Math.max(maxLen, curLen);
+        return maxLen;
+    }
+
+    public String getPermutation(int n, int k) {
+        int[] fac = new int[n + 1];
+        Arrays.fill(fac, 1);
+        ArrayList<Integer> list = new ArrayList<>();
+        for (int i = 1; i <= n; i++) {
+            list.add(i);
+            fac[i] = i * fac[i - 1];
+        }
+        System.out.println(Arrays.toString(fac));
+        StringBuffer sb = new StringBuffer();
+        --k;
+        while (--n >= 0) {
+            if (list.isEmpty()) return sb.toString();
+            int mod = k / fac[n];
+            sb.append(list.get(mod));
+            list.remove(mod);
+            k = k % fac[n];
+
+        }
+        return sb.toString();
+    }
+
     @Test
     public void test1() {
         //lengthOfLongestSubstring("abcabcbb");
-        int result = findKthLargest(new int[]{3, 1, 2, 4}, 2);
+        String result = getPermutation(3, 3);
         System.out.println(result);
     }
 
