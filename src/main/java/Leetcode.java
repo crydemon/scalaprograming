@@ -370,11 +370,50 @@ public class Leetcode {
         }
     }
 
+    public int[][] merge(int[][] intervals) {
+        if (intervals.length <= 1) return intervals;
+        Arrays.sort(intervals, Comparator.comparingInt(interval -> interval[0]));
+        List<int[]> result = new ArrayList<>();
+        int[] newInterval = intervals[0];
+
+        result.add(newInterval);
+        for (int[] interval : intervals) {
+            if (interval[0] <= newInterval[1]) {
+                newInterval[1] = Math.max(newInterval[1], interval[1]);
+            } else {
+                newInterval = interval;
+                result.add(newInterval);
+            }
+        }
+        result.forEach(x -> {
+            System.out.println(x[0] + "," + x[1]);
+        });
+        return result.toArray(new int[result.size()][]);
+    }
+
+    public int trap(int[] height) {
+        int result = 0;
+        int left = 0;
+        int right = height.length - 1;
+        int level = 0;
+        int lower = 0;
+        while (left < right) {
+            //维护长的那一端， 并选出短的那一端
+            lower = height[height[left] < height[right] ? left++ : right--];
+            //维护次高的那一端
+            level = Math.max(level, lower);
+            //次长减去当前高度就是这个格子能装的水了
+            result += level - lower;
+        }
+        return result;
+    }
+
     @Test
     public void test1() {
-        //lengthOfLongestSubstring("abcabcbb");
-        String result = getPermutation(3, 3);
-        System.out.println(result);
+        int[][] nums = new int[][]{
+                {1, 3}, {2, 6}, {8, 10}, {15, 18}
+        };
+        merge(nums);
     }
 
     public Node connect(Node root) {
