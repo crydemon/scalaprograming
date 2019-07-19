@@ -1,4 +1,3 @@
-import fpinscala.chapter3.List;
 import org.junit.Test;
 import org.scalatest.Fact;
 import scala.Int;
