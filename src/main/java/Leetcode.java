@@ -1,3 +1,4 @@
+import fpinscala.chapter3.List;
 import org.junit.Test;
 import org.scalatest.Fact;
 import scala.Int;
@@ -406,6 +407,49 @@ public class Leetcode {
             result += level - lower;
         }
         return result;
+    }
+
+    public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
+        ListNode dummy = new ListNode(-1);
+        ListNode cur = dummy;
+        while (l1 != null || l2 != null) {
+            if (l1 == null) {
+                cur.next = l2;
+                break;
+            } else if (l2 == null) {
+                cur.next = l1;
+                break;
+            } else if (l1.val < l2.val) {
+                cur.next = l1;
+                l1 = l1.next;
+            } else {
+                cur.next = l2;
+                l2 = l2.next;
+            }
+            cur = cur.next;
+        }
+        return dummy.next;
+    }
+
+    public ListNode reverseList(ListNode head) {
+//        ListNode p1 = null;
+//        ListNode p2 = head;
+//        while ( p2 != null) {
+//            p2 = head.next;
+//            head.next = p1;
+//            p1 = head;
+//            head = p2;
+//        }
+//        return p1;
+        if(head == null || head.next == null){
+            return head;
+        }
+        ListNode result = reverseList(head.next);
+        ListNode last = head.next;
+        last.next = head;
+        head.next = null;
+        return  result;
+
     }
 
     @Test
