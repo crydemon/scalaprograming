@@ -197,6 +197,28 @@ public class Leetcode {
         return maxArea;
     }
 
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        ListNode dummy = new ListNode(-1);
+        ListNode result = dummy;
+        int carry = 0;
+        while (l1 != null || l2 != null || carry != 0) {
+            int cur = 0;
+            if (l2 != null) {
+                cur += l2.val;
+                l2 = l2.next;
+            }
+            if (l1 != null) {
+                cur += l1.val;
+                l1 = l1.next;
+            }
+            cur += carry;
+            dummy.next = new ListNode(cur % 10);
+            carry = (cur) / 10;
+            dummy = dummy.next;
+        }
+        return result.next;
+    }
+
     public int helper3(int i, int j, int[][] grid) {
         if (i < 0 || i > grid.length || j < 0 || j > grid[0].length || grid[i][j] == 0) return 0;
         grid[i][j] = 0;
@@ -225,6 +247,65 @@ public class Leetcode {
             }
         }
         return -1;
+    }
+
+//    public ListNode sortList(ListNode head) {
+//        if(head == null || head.next == null) return head;
+//        ListNode pre = null, slow = head, fast = head;
+//        while (fast != null && fast.next != null) {
+//            pre = slow;
+//            slow = slow.next;
+//            fast = fast.next.next;
+//        }
+//        pre.next = null;
+//        ListNode l1 = sortList(head);
+//        ListNode l2 = sortList(slow);
+//        return merge(l1, l2);
+//    }
+//    private ListNode merge(ListNode l1, ListNode l2){
+//        ListNode l = new ListNode(0), p = l;
+//        while (l1 != null & l2 != null) {
+//            if(l1.val < l2.val) {
+//                p.next = l1;
+//                l1 = l1.next;
+//            } else {
+//                p.next = l2;
+//                l2 = l2.next;
+//            }
+//            p = p.next;
+//        }
+//        if(l1 != null) p.next = l1;
+//        if(l2 != null) p.next = l2;
+//        return l.next;
+//    }
+
+    public ListNode sortList(ListNode head) {
+        quickSort(head, null);
+        return head;
+    }
+    public void quickSort(ListNode head, ListNode end){
+        if(head == end) return;
+        ListNode partition = helper4(head);
+        quickSort(head, partition);
+        quickSort(partition.next, end);
+    }
+    public ListNode helper4(ListNode head) {
+        ListNode slow = head;
+        ListNode fast = head.next;
+        while (fast != null) {
+            if(fast.val < head.val) {
+                slow = slow.next;
+                swapListVal(slow, fast);
+            }
+            fast = fast.next;
+        }
+        swapListVal(slow, head);
+        return slow;
+    }
+    public void swapListVal(ListNode x1, ListNode x2) {
+        int tmp = x1.val;
+        x1.val = x2.val;
+        x2.val = tmp;
     }
 
     public int findLengthOfLCIS(int[] nums) {
@@ -440,14 +521,14 @@ public class Leetcode {
 //            head = p2;
 //        }
 //        return p1;
-        if(head == null || head.next == null){
+        if (head == null || head.next == null) {
             return head;
         }
         ListNode result = reverseList(head.next);
         ListNode last = head.next;
         last.next = head;
         head.next = null;
-        return  result;
+        return result;
 
     }
 
