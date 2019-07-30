@@ -619,6 +619,53 @@ public class Leetcode {
         return left == null ? right : left;
     }
 
+    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+        if (root == null) return null;
+        List<List<Integer>> result = new ArrayList<>();
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.add(root);
+        boolean flag = false;
+        while (!queue.isEmpty()) {
+            ArrayList<Integer> curLayer = new ArrayList<>();
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                TreeNode node = queue.poll();
+                curLayer.add(node.val);
+                if (node.left != null) {
+                    queue.add(node.left);
+                }
+                if (node.right != null) {
+                    queue.add(node.right);
+                }
+            }
+            if (flag) Collections.reverse(curLayer);
+            result.add(curLayer);
+            flag = !flag;
+
+        }
+        return result;
+    }
+
+    public int maxProfit(int[] prices) {
+        int max = 0;
+        int min = prices[0];
+        for (int i = 0; i < prices.length; i++) {
+            min = Math.min(prices[i], min);
+            max = Math.max(max, prices[i] - min);
+        }
+        return max;
+    }
+    public int maxProfitII(int[] prices) {
+        int max = 0;
+        for (int i = 1; i < prices.length; i++) {
+            int tmp = prices[i] - prices[i-1];
+            if(tmp > 0) {
+                max += tmp;
+            }
+        }
+        return max;
+    }
+
     @Test
     public void test1() {
         TreeNode root = new TreeNode(3);
