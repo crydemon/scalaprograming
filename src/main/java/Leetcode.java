@@ -655,30 +655,47 @@ public class Leetcode {
         }
         return max;
     }
+
     public int maxProfitII(int[] prices) {
         int max = 0;
         for (int i = 1; i < prices.length; i++) {
-            int tmp = prices[i] - prices[i-1];
-            if(tmp > 0) {
+            int tmp = prices[i] - prices[i - 1];
+            if (tmp > 0) {
                 max += tmp;
             }
         }
         return max;
     }
 
+    public int maximalSquare(char[][] matrix) {
+        if (matrix == null || matrix.length == 0) return 0;
+        int max = 0;
+        int[][] dp = new int[matrix.length][matrix[0].length];
+        for (int i = 0; i < matrix.length; i++) {
+            dp[i][0] = matrix[i][0] - '0';
+            max = Math.max(max, dp[i][0]);
+        }
+        for (int i = 0; i < matrix[0].length; i++) {
+            dp[0][i] = matrix[0][i] - '0';
+            max = Math.max(max, dp[0][i]);
+        }
+        for (int i = 1; i < matrix.length; i++) {
+            for (int j = 1; j < matrix[0].length; j++) {
+                if (matrix[i][j] == '1') {
+                    dp[i][j] = Math.min(dp[i - 1][j - 1], Math.min(dp[i - 1][j], dp[i][j - 1])) + 1;
+                    max = Math.max(dp[i][j], max);
+                }
+            }
+        }
+        return max * max;
+    }
+
     @Test
     public void test1() {
-        TreeNode root = new TreeNode(3);
-        root.left = new TreeNode(5);
-        root.left.left = new TreeNode(6);
-        root.left.right = new TreeNode(2);
-        root.left.right.left = new TreeNode(7);
-        root.left.right.right = new TreeNode(4);
-        root.right = new TreeNode(1);
-        root.right.left = new TreeNode(0);
-        root.right.right = new TreeNode(8);
-        TreeNode x = lowestCommonAncestor(root, root.left.left, root.right.right);
-        System.out.println("result:" + x.val);
+        String e = "1";
+        String x = new String("1");
+
+        System.out.println(("1" == x.intern()) ? "true" : "false");
     }
 
     public Node connect(Node root) {
