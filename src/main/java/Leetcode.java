@@ -690,6 +690,17 @@ public class Leetcode {
         return max * max;
     }
 
+    public int maxSubArray(int[] nums) {
+        int max = nums[0];
+        int pre = nums[0];
+        for (int i = 1; i < nums.length; i++) {
+            if (pre < 0) pre = 0;
+            pre = pre + nums[i];
+            max = Math.max(pre, max);
+        }
+        return max;
+    }
+
     @Test
     public void test1() {
         String e = "1";
