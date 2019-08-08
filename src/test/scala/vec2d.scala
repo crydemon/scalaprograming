@@ -101,7 +101,7 @@ trait D extends C {
     case obj: D => {
       if (this eq obj) true
       else {
-        (repr == obj.repr)  && (obj canEqual this) && (name == obj.name)
+        (repr == obj.repr) && (obj canEqual this) && (name == obj.name)
       }
     }
     case _ => false
