@@ -283,17 +283,19 @@ public class Leetcode {
         quickSort(head, null);
         return head;
     }
-    public void quickSort(ListNode head, ListNode end){
-        if(head == end) return;
+
+    public void quickSort(ListNode head, ListNode end) {
+        if (head == end) return;
         ListNode partition = helper4(head);
         quickSort(head, partition);
         quickSort(partition.next, end);
     }
+
     public ListNode helper4(ListNode head) {
         ListNode slow = head;
         ListNode fast = head.next;
         while (fast != null) {
-            if(fast.val < head.val) {
+            if (fast.val < head.val) {
                 slow = slow.next;
                 swapListVal(slow, fast);
             }
@@ -302,10 +304,81 @@ public class Leetcode {
         swapListVal(slow, head);
         return slow;
     }
+
     public void swapListVal(ListNode x1, ListNode x2) {
         int tmp = x1.val;
         x1.val = x2.val;
         x2.val = tmp;
+    }
+
+    public ListNode detectCycle(ListNode head) {
+        if (head == null) return null;
+        ListNode slow = head;
+        ListNode fast = head;
+        while (slow != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+            if (slow == fast) { //s = x + y // 2s = x + 2 * y + z
+                slow = head;
+                while (slow != fast) {
+                    slow = slow.next;
+                    fast = fast.next;
+                }
+                return slow;
+            }
+        }
+        return null;
+    }
+
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        ListNode p1 = headA;
+        ListNode p2 = headB;
+        while (p1 != null && p2 != null) {
+            p1 = p1.next;
+            p2 = p2.next;
+        }
+        if (p1 == null) {
+            while (p2 != null) {
+                headB = headB.next;
+                p2 = p2.next;
+            }
+        }
+        if (p2 == null) {
+            while (p1 != null) {
+                headA = headA.next;
+                p1 = p1.next;
+            }
+        }
+        while (headA != headB) {
+            headA = headA.next;
+            headB = headB.next;
+        }
+        return headA;
+    }
+
+    public ListNode mergeKLists(ListNode[] lists) {
+        return helper6(lists, 0, lists.length - 1);
+    }
+
+    public ListNode helper6(ListNode[] lists, int left, int right) {
+        if (left > right) return null;
+        if (left == right) return lists[left];
+        int mid = left + (right - left) / 2;
+        ListNode l1 = helper6(lists, left, mid);
+        ListNode l2 = helper6(lists, mid + 1, right);
+        return mergeTwoList(l1, l2);
+    }
+
+    public ListNode mergeTwoList(ListNode l1, ListNode l2) {
+        if (l1 == null) return l2;
+        if (l2 == null) return l1;
+        if (l1.val < l2.val) {
+            l1.next = mergeTwoList(l1.next, l2);
+            return l1;
+        } else {
+            l2.next = mergeTwoList(l1, l2.next);
+            return l2;
+        }
     }
 
     public int findLengthOfLCIS(int[] nums) {
@@ -326,6 +399,7 @@ public class Leetcode {
     public int findKthLargest(int[] nums, int k) {
         return search(k, 0, nums.length - 1, nums);
     }
+
 
     public int search(int k, int left, int right, int[] nums) {
         int x = partition(left, right, nums);
@@ -532,12 +606,107 @@ public class Leetcode {
 
     }
 
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if (root == null || root == p || root == q) {
+//            if(root != null) System.out.println(root.val + "------");
+//            else  System.out.println("null");
+            return root;
+        }
+        System.out.println(root.val);
+        TreeNode left = lowestCommonAncestor(root.left, p, q);
+        TreeNode right = lowestCommonAncestor(root.right, p, q);
+        if (left != null && right != null) return root;
+        return left == null ? right : left;
+    }
+
+    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+        if (root == null) return null;
+        List<List<Integer>> result = new ArrayList<>();
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.add(root);
+        boolean flag = false;
+        while (!queue.isEmpty()) {
+            ArrayList<Integer> curLayer = new ArrayList<>();
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                TreeNode node = queue.poll();
+                curLayer.add(node.val);
+                if (node.left != null) {
+                    queue.add(node.left);
+                }
+                if (node.right != null) {
+                    queue.add(node.right);
+                }
+            }
+            if (flag) Collections.reverse(curLayer);
+            result.add(curLayer);
+            flag = !flag;
+
+        }
+        return result;
+    }
+
+    public int maxProfit(int[] prices) {
+        int max = 0;
+        int min = prices[0];
+        for (int i = 0; i < prices.length; i++) {
+            min = Math.min(prices[i], min);
+            max = Math.max(max, prices[i] - min);
+        }
+        return max;
+    }
+
+    public int maxProfitII(int[] prices) {
+        int max = 0;
+        for (int i = 1; i < prices.length; i++) {
+            int tmp = prices[i] - prices[i - 1];
+            if (tmp > 0) {
+                max += tmp;
+            }
+        }
+        return max;
+    }
+
+    public int maximalSquare(char[][] matrix) {
+        if (matrix == null || matrix.length == 0) return 0;
+        int max = 0;
+        int[][] dp = new int[matrix.length][matrix[0].length];
+        for (int i = 0; i < matrix.length; i++) {
+            dp[i][0] = matrix[i][0] - '0';
+            max = Math.max(max, dp[i][0]);
+        }
+        for (int i = 0; i < matrix[0].length; i++) {
+            dp[0][i] = matrix[0][i] - '0';
+            max = Math.max(max, dp[0][i]);
+        }
+        for (int i = 1; i < matrix.length; i++) {
+            for (int j = 1; j < matrix[0].length; j++) {
+                if (matrix[i][j] == '1') {
+                    dp[i][j] = Math.min(dp[i - 1][j - 1], Math.min(dp[i - 1][j], dp[i][j - 1])) + 1;
+                    max = Math.max(dp[i][j], max);
+                }
+            }
+        }
+        return max * max;
+    }
+
+    public int maxSubArray(int[] nums) {
+        int max = nums[0];
+        int pre = nums[0];
+        for (int i = 1; i < nums.length; i++) {
+            if (pre < 0) pre = 0;
+            pre = pre + nums[i];
+            max = Math.max(pre, max);
+        }
+        return max;
+    }
+
     @Test
     public void test1() {
-        int[][] nums = new int[][]{
-                {1, 3}, {2, 6}, {8, 10}, {15, 18}
-        };
-        merge(nums);
+        String e = "1";
+        String x = new String("1");
+
+        System.out.println(("1" == x.intern()) ? "true" : "false");
     }
 
     public Node connect(Node root) {
